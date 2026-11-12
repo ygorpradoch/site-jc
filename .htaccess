@@ -1,0 +1,76 @@
+# JC Síndico Profissional — Hostinger (Apache/LiteSpeed)
+
+Options -Indexes
+DirectoryIndex index.php
+ErrorDocument 404 /404.php
+AddDefaultCharset UTF-8
+
+<IfModule mod_rewrite.c>
+RewriteEngine On
+
+# --- HTTPS obrigatório ---
+RewriteCond %{HTTPS} off
+RewriteCond %{HTTP:X-Forwarded-Proto} !https
+RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+# --- sem "www" (ajuste se preferir o contrário) ---
+RewriteCond %{HTTP_HOST} ^www\.(.+)$ [NC]
+RewriteRule ^ https://%1%{REQUEST_URI} [L,R=301]
+
+# --- nada de código privado, versionamento ou documentação pela web ---
+RewriteRule ^(app|\.git|\.github)(/|$) - [F,L]
+RewriteCond %{REQUEST_URI} !/\.well-known/
+RewriteRule (^|/)\. - [F,L]
+RewriteRule \.(md|sql|log|ini|lock|bak|example\.php)$ - [F,L,NC]
+
+# --- tentativas comuns contra WordPress: o site não é mais WordPress ---
+RewriteRule ^(wp-login\.php|xmlrpc\.php|wp-config\.php)$ - [F,L,NC]
+
+# --- endereços limpos ---
+RewriteRule ^guia/?$ guia.php [L,QSA]
+RewriteRule ^guia/([a-z0-9-]+)/?$ guia.php?slug=$1 [L,QSA]
+RewriteRule ^privacidade/?$ privacidade.php [L]
+RewriteRule ^depoimento/?$ depoimento.php [L]
+RewriteRule ^sitemap\.xml$ sitemap.php [L]
+RewriteRule ^robots\.txt$ robots.php [L]
+
+# --- redirecionamentos do site antigo (WordPress) ---
+# Ative quando este site substituir o juniorsindico.pro. Confira as URLs antigas no
+# Google Search Console antes e acrescente uma linha por página que tenha visitas.
+# RewriteRule ^contato/?$ /#contato [L,R=301,NE]
+# RewriteRule ^sobre/?$ /#quem-sou [L,R=301,NE]
+# RewriteRule ^servicos/?$ /#servicos [L,R=301,NE]
+# RewriteRule ^blog/?$ /guia [L,R=301]
+# RewriteRule ^category/ /guia [L,R=301]
+# RewriteRule ^feed/?$ /guia [L,R=301]
+</IfModule>
+
+# --- cabeçalhos de segurança ---
+<IfModule mod_headers.c>
+Header always set X-Content-Type-Options "nosniff"
+Header always set X-Frame-Options "DENY"
+Header always set Referrer-Policy "strict-origin-when-cross-origin"
+Header always set Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=()"
+Header always set Strict-Transport-Security "max-age=31536000"
+Header always set Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob:; media-src 'self'; connect-src 'self'; frame-ancestors 'none'; form-action 'self'; base-uri 'self'; object-src 'none'"
+Header unset X-Powered-By
+
+# CSS/JS levam ?v= (data do arquivo): cache longo
+<FilesMatch "\.(css|js)$">
+Header set Cache-Control "public, max-age=31536000, immutable"
+</FilesMatch>
+# imagens e vídeos podem ser trocados com o mesmo nome: cache de 7 dias
+<FilesMatch "\.(svg|webp|jpe?g|png|mp4|woff2?)$">
+Header set Cache-Control "public, max-age=604800"
+</FilesMatch>
+</IfModule>
+
+<IfModule mod_deflate.c>
+AddOutputFilterByType DEFLATE text/html text/css text/plain application/javascript application/json application/xml image/svg+xml
+</IfModule>
+
+<IfModule mod_mime.c>
+AddType image/webp .webp
+AddType video/mp4 .mp4
+AddType image/svg+xml .svg
+</IfModule>

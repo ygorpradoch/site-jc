@@ -1,0 +1,23 @@
+# Segredos: NUNCA versionar
+/app/config.local.php
+/jc-config/
+.env
+*.pem
+*.key
+
+# Arquivos enviados pelo painel (ficam só no servidor)
+/uploads/*
+!/uploads/.htaccess
+!/uploads/condominios/
+/uploads/condominios/*
+!/uploads/condominios/.gitkeep
+
+# Sistema / editores
+*.log
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/
+node_modules/
+_teste*.html
