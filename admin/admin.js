@@ -69,6 +69,7 @@ VIEWS.geral=function(){
     if(p.depo)pend.push([p.depo+(p.depo>1?' depoimentos aguardando':' depoimento aguardando')+' aprovação','Nada vai ao site sem sua aprovação','depo','Revisar']);
     if(p.rascunhos)pend.push([p.rascunhos+(p.rascunhos>1?' artigos em rascunho':' artigo em rascunho'),'Guia do condomínio','artigos','Abrir']);
     p.sem_foto.forEach(function(c){pend.push([c.nome+' sem foto','Quadro de condomínios','condos','Enviar'])});
+    if(r.alertas24)pend.unshift([r.alertas24+(r.alertas24>1?' alertas de segurança':' alerta de segurança')+' nas últimas 24 horas','Tentativas de acesso e ações suspeitas','logs','Ver registros']);
     render(
       title(saud+', '+String(r.nome).split(' ')[0],'Resumo dos últimos 30 dias no site.'),
       h('div.grid4',
@@ -86,7 +87,7 @@ VIEWS.geral=function(){
           :h('p.empty','Tudo em dia.'))
       )
     );
-    badge('b-novos',p.novos);badge('b-agenda',p.agenda);badge('b-depo',p.depo);
+    badge('b-novos',p.novos);badge('b-agenda',p.agenda);badge('b-depo',p.depo);badge('b-logs',r.alertas24);
   });
 };
 
@@ -132,6 +133,10 @@ VIEWS.contatos=function(){
 };
 
 /* ================= agenda ================= */
+/* ================= agenda ================= */
+var DIAS_NOME=['Domingo','Segunda','Terça','Quarta','Quinta','Sexta','Sábado'],DIAS_ORDEM=[1,2,3,4,5,6,0];
+function hmMin(s){return parseInt(s.slice(0,2),10)*60+parseInt(s.slice(3,5),10)}
+function nSlots(j,dur){return j.ativo&&j.de&&j.ate&&hmMin(j.ate)-hmMin(j.de)>=dur?Math.floor((hmMin(j.ate)-hmMin(j.de))/dur):0}
 VIEWS.agenda=function(){
   get('agenda').then(function(r){if(!r.ok)return;
     var porDia={};r.agendamentos.forEach(function(a){(porDia[a.dia]=porDia[a.dia]||[]).push(a)});
@@ -147,21 +152,53 @@ VIEWS.agenda=function(){
             !a.passado?h('button.btn.btn-line.btn-sm',{type:'button',onclick:function(){if(confirmar('Cancelar esta conversa? O horário volta a ficar livre no site.'))api('ag_status',{id:a.id,status:'cancelado'}).then(function(x){if(x.ok){toast('Cancelada; horário liberado');VIEWS.agenda()}})}},'Cancelar'):null));
       }));
     })):h('p.empty','Nenhuma conversa marcada.');
-    var disp=r.disp;
-    function setDisp(k){return function(v){var d={};d[k]=v?1:0;api('disponibilidade',d).then(function(x){if(x.ok){toast('Disponibilidade atualizada no site');VIEWS.agenda()}})}}
-    var bData=h('input',{type:'date',required:true,min:new Date().toISOString().slice(0,10)}),bHora=h('select',h('option',{value:''},'Dia inteiro'),['09:00','09:30','10:00','10:30','11:00','14:00','14:30','15:00','15:30','16:00'].map(function(x){return h('option',x)})),bMot=h('input',{maxLength:120,placeholder:'Ex.: assembleia, viagem'});
+
+    /* ---- editor dos horários de atendimento ---- */
+    var S=JSON.parse(JSON.stringify(r.config)),op=r.opcoes,counts={},total=h('strong.sch-total');
+    function recount(){var t=0;DIAS_ORDEM.forEach(function(d){var n=nSlots(S.dias[d].manha,S.duracao)+nSlots(S.dias[d].tarde,S.duracao);t+=n;
+      if(counts[d]){counts[d].textContent=n?n+(n>1?' horários':' horário'):'fechado';counts[d].classList.toggle('off',!n)}});
+      total.textContent=t?t+' horários por semana':'Nenhum horário aberto'}
+    function combo(vals,cur,fmt,onch){var s=h('select',vals.map(function(v){return h('option',{value:v},fmt(v))}));s.value=String(cur);s.addEventListener('change',function(){onch(parseInt(s.value,10));recount()});return s}
+    var durS=combo(op.duracoes,S.duracao,function(v){return v+' minutos'},function(v){S.duracao=v}),
+        antS=combo(op.antecedencias,S.antecedencia,function(v){return v===1?'a partir de amanhã':'daqui a '+v+' dias'},function(v){S.antecedencia=v}),
+        janS=combo(op.janelas,S.janela,function(v){return v+' dias à frente'},function(v){S.janela=v});
+    function periodo(d,per,rot){
+      var j=S.dias[d][per],box,
+          de=h('input',{type:'time',step:300,value:j.de,'aria-label':rot+', início, '+DIAS_NOME[d]}),
+          ate=h('input',{type:'time',step:300,value:j.ate,'aria-label':rot+', fim, '+DIAS_NOME[d]});
+      function sync(){de.disabled=ate.disabled=!j.ativo;box.classList.toggle('off',!j.ativo);recount()}
+      de.addEventListener('input',function(){j.de=de.value;recount()});ate.addEventListener('input',function(){j.ate=ate.value;recount()});
+      box=h('div.sch-per',toggle(j.ativo,rot+' de '+DIAS_NOME[d],function(v){j.ativo=v;sync()}),h('span.sch-rot',rot),de,h('span.sch-ate','às'),ate);
+      sync();return box;
+    }
+    var grade=h('div.sch');
+    function desenhar(){grade.textContent='';counts={};
+      DIAS_ORDEM.forEach(function(d){counts[d]=h('small.sch-n');
+        grade.appendChild(h('div.sch-row',h('div.sch-day',h('b',DIAS_NOME[d]),counts[d]),periodo(d,'manha','Manhã'),periodo(d,'tarde','Tarde')))});
+      recount()}
+    desenhar();
+    var salvando=false;
+    var editor=h('div.panel.mt',h('h3','Horários de atendimento'),
+      h('div.pad',h('p.muted','Escolha em quais dias e períodos você atende. Cada período vira horários de início, de acordo com a duração da conversa (ex.: 9h às 11h30 com conversas de 30 min = 9h, 9h30, 10h, 10h30 e 11h). Conversas já marcadas continuam valendo se você mudar os horários.')),
+      h('div.sch-opts',field('Duração de cada conversa',durS),field('Aviso mínimo',antS,false,'(para pedir um horário)'),field('Mostrar no site',janS)),
+      grade,
+      h('div.sch-foot',total,h('span.sch-acts',
+        h('button.btn.btn-line.btn-sm',{type:'button',onclick:function(){var m=JSON.stringify(S.dias[1]);[2,3,4,5].forEach(function(d){S.dias[d]=JSON.parse(m)});desenhar();toast('Segunda copiada para terça a sexta. Falta salvar.')}},'Copiar segunda para terça a sexta'),
+        h('button.btn.btn-ink.btn-sm',{type:'button',onclick:function(ev){if(salvando)return;salvando=true;ev.currentTarget.disabled=true;
+          api('agenda_config_salvar',S).then(function(x){salvando=false;if(x.ok){toast('Horários salvos. Já valem no site.');VIEWS.agenda()}else{ev.target.disabled=false}})}},'Salvar horários'))));
+
+    /* ---- bloqueios ---- */
+    var bData=h('input',{type:'date',required:true,min:new Date().toISOString().slice(0,10)}),bHora=h('select',h('option',{value:''},'Dia inteiro')),bMot=h('input',{maxLength:120,placeholder:'Ex.: assembleia, viagem'});
+    bData.addEventListener('change',function(){if(!bData.value)return;var dow=new Date(bData.value+'T12:00:00').getDay();bHora.textContent='';bHora.appendChild(h('option',{value:''},'Dia inteiro'));(r.slots_dow[dow]||[]).forEach(function(x){bHora.appendChild(h('option',x))})});
     var bForm=h('form.inline-form.bl-form',{onsubmit:function(e){e.preventDefault();api('bloqueio_add',{data:bData.value,hora:bHora.value,motivo:bMot.value}).then(function(x){if(x.ok){toast('Bloqueado');VIEWS.agenda()}})}},
       field('Bloquear data',bData),field('Horário',bHora),field('Motivo',bMot,false,'(opcional)'),h('button.btn.btn-ink.btn-sm',{type:'submit'},'Bloquear'));
-    var prev=r.dias.length?h('div.ag-prev',r.dias.map(function(d){var livres=d.slots.filter(function(s){return s.livre}).length;return h('span',h('b',d.dia+' '+d.rotulo),livres+' livres')})):h('p.empty','Nenhum horário aparece no site agora. Ative manhã ou tarde.');
+    var prev=r.dias.length?h('div.ag-prev',r.dias.map(function(d){var livres=d.slots.filter(function(s){return s.livre}).length;return h('span',h('b',d.dia+' '+d.rotulo),livres+' livres')})):h('p.empty','Nenhum horário aparece no site agora. Ative algum período nos horários de atendimento.');
     render(
-      title('Agenda','Conversas pedidas pelo site. Horários livres aparecem automaticamente para agendamento.'),
+      title('Agenda','Conversas pedidas pelo site e os horários em que você atende.'),
       h('div.panel.mt',h('h3','Próximas conversas'),h('div.pad',lista)),
+      editor,
       h('div.cols',
-        h('div.panel',h('h3','Horários que aparecem no site'),h('ul.list',
-          h('li',h('div.t',h('b','Manhã · 9h às 11h30'),h('small','Segunda a sexta')),toggle(disp.manha,'Manhã disponível',setDisp('manha'))),
-          h('li',h('div.t',h('b','Tarde · 14h às 16h30'),h('small','Segunda a sexta')),toggle(disp.tarde,'Tarde disponível',setDisp('tarde'))),
-          h('li',h('div.t',h('b','Sábado · 9h às 11h'),h('small','Somente se quiser atender no sábado')),toggle(disp.sabado,'Sábado disponível',setDisp('sabado')))),
-          h('div.pad',h('small.muted','Próximos dias no site:'),prev)),
+        h('div.panel',h('h3','Como está aparecendo no site'),h('div.pad',h('small.muted','Próximos dias oferecidos:'),prev)),
         h('div.panel',h('h3','Dias e horários bloqueados'),bForm,
           r.bloqueios.length?h('ul.list',r.bloqueios.map(function(b){return h('li',h('div.t',h('b',b.dia+(b.hora?' · '+b.hora:' · dia inteiro')),h('small',b.motivo||'')),
             h('button.btn.btn-line.btn-sm',{type:'button',onclick:function(){api('bloqueio_del',{id:b.id}).then(function(x){if(x.ok){toast('Desbloqueado');VIEWS.agenda()}})}},'Remover'))})):h('p.empty','Nenhum bloqueio.'))
@@ -286,27 +323,241 @@ VIEWS.artigos=function(){
     );
   });
 };
+/* reduz a foto no navegador antes de enviar (fotos de celular passam de 6 MB): maior lado = max px, JPEG */
+function prepImagem(file,max){
+  return loadImage(file).then(function(img){
+    var w=img.naturalWidth,hh=img.naturalHeight,f=Math.min(1,max/Math.max(w,hh)),c=document.createElement('canvas');
+    c.width=Math.round(w*f);c.height=Math.round(hh*f);var x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,c.width,c.height);x.imageSmoothingQuality='high';x.drawImage(img,0,0,c.width,c.height);
+    return toBlob(c,'image/jpeg',.86).then(function(b){return {blob:b,w:w,h:hh}});
+  });
+}
+function enviarMidia(tipo,blob,nome){
+  var fd=new FormData();fd.append('tipo',tipo);fd.append('arquivo',blob,nome);
+  return api('midia_enviar',fd,true);
+}
+
 function editor(a){
   var tit=h('input',{maxLength:160,required:true,value:a.titulo||''}),slug=h('input',{maxLength:100,value:a.slug||'',placeholder:'gerado a partir do título'}),
     cat=h('input',{maxLength:40,value:a.categoria||'GESTÃO',list:'cats'}),res=h('input',{maxLength:300,value:a.resumo||'',placeholder:'Uma frase que aparece no cartão e no Google'}),
-    corpo=h('textarea.art-editor',{rows:18}),st=h('select',h('option',{value:'rascunho'},'Rascunho (não aparece no site)'),h('option',{value:'publicado'},'Publicado'));
+    corpo=h('textarea.art-editor',{rows:18,id:'corpo'}),st=h('select',h('option',{value:'rascunho'},'Rascunho (não aparece no site)'),h('option',{value:'publicado'},'Publicado'));
   corpo.value=a.corpo||'';st.value=a.status||'rascunho';
   var slugTocado=!!a.slug;slug.addEventListener('input',function(){slugTocado=true});
   tit.addEventListener('input',function(){if(!slugTocado)slug.value=tit.value.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,90)});
-  var id=a.id||0;
-  function salvar(ver){return api('artigo_salvar',{id:id,titulo:tit.value,slug:slug.value,categoria:cat.value,resumo:res.value,corpo:corpo.value,status:st.value}).then(function(x){
+  var id=a.id||0,capa=a.capa||'';
+
+  /* ----- capa ----- */
+  var capaIn=h('input',{type:'file',accept:'image/jpeg,image/png,image/webp'}),capaPrev=h('div.capa-prev'),capaRm=h('button.btn.btn-line.btn-sm',{type:'button',onclick:function(){capa='';drawCapa()}},'Remover capa');
+  function drawCapa(){capaPrev.textContent='';capaRm.hidden=!capa;
+    capaPrev.appendChild(capa?h('img',{src:SITE+capa,alt:'Capa atual'}):h('p.muted','Sem capa. O cartão do artigo usa um bloco azul com o nome da categoria.'))}
+  capaIn.addEventListener('change',function(){var f=capaIn.files[0];if(!f)return;
+    if(['image/jpeg','image/png','image/webp'].indexOf(f.type)<0){toast('Envie a capa em JPG, PNG ou WEBP',true);capaIn.value='';return}
+    capaPrev.textContent='';capaPrev.appendChild(h('p.muted','Enviando a capa…'));
+    prepImagem(f,1600).then(function(r){
+      if(r.w<600){toast('A foto é pequena para capa (mínimo 600 px de largura).',true);drawCapa();return}
+      return enviarMidia('capa',r.blob,'capa.jpg').then(function(x){if(x.ok){capa=x.caminho}drawCapa()})
+    }).catch(function(){toast('Não foi possível ler a imagem.',true);drawCapa()});
+    capaIn.value='';
+  });
+  drawCapa();
+
+  /* ----- barra de formatação ----- */
+  function sel(){return {a:corpo.selectionStart,b:corpo.selectionEnd,t:corpo.value}}
+  function pôr(txt,ini,fim){var s=sel();corpo.value=s.t.slice(0,s.a)+txt+s.t.slice(s.b);corpo.focus();corpo.setSelectionRange(s.a+ini,s.a+fim)}
+  function envolver(pre,suf,exemplo){var s=sel(),meio=s.t.slice(s.a,s.b)||exemplo;pôr(pre+meio+suf,pre.length,pre.length+meio.length)}
+  function prefixarLinhas(pre,exemplo){var s=sel(),ini=s.t.lastIndexOf('\n',s.a-1)+1,fim=s.b;
+    if(fim===s.a){var nl=s.t.indexOf('\n',fim);fim=nl<0?s.t.length:nl} /* sem seleção: formata a linha onde está o cursor */
+    var trecho=s.t.slice(ini,fim)||exemplo;
+    var novo=trecho.split('\n').map(function(l){return pre+l.replace(/^(#{2,3} |[-•] |> )/,'')}).join('\n');
+    corpo.value=s.t.slice(0,ini)+novo+s.t.slice(fim);corpo.focus();corpo.setSelectionRange(ini+pre.length,ini+novo.length)}
+  /* bloco próprio (foto/vídeo/linha): garante linha em branco antes e depois; devolve a posição do cursor */
+  function inserirBloco(txt,cursorDentro){var s=sel(),antes=s.t.slice(0,s.a).replace(/\s+$/,''),depois=s.t.slice(s.b).replace(/^\s+/,''),pre=antes?'\n\n':'',pos=antes.length+pre.length;
+    corpo.value=antes+pre+txt+(depois?'\n\n'+depois:'\n');corpo.focus();var p=pos+(cursorDentro==null?txt.length:cursorDentro);corpo.setSelectionRange(p,p)}
+  var busy=false,msg=h('span.ed-msg');
+  function ocupado(on,txt){busy=on;msg.textContent=on?txt:'';$$('.ed-bar button').forEach(function(b){b.disabled=on})}
+  var fotos=h('input',{type:'file',accept:'image/jpeg,image/png,image/webp',multiple:true,hidden:true}),
+      videoIn=h('input',{type:'file',accept:'video/mp4',hidden:true});
+  fotos.addEventListener('change',function(){
+    var lista=Array.prototype.slice.call(fotos.files);fotos.value='';if(!lista.length)return;
+    var ok=lista.filter(function(f){return ['image/jpeg','image/png','image/webp'].indexOf(f.type)>=0});
+    if(ok.length<lista.length)toast('Só JPG, PNG ou WEBP. Alguns arquivos foram ignorados.',true);
+    var i=0;(function prox(){
+      if(i>=ok.length){ocupado(false);return}
+      ocupado(true,'Enviando foto '+(i+1)+' de '+ok.length+'…');
+      prepImagem(ok[i],1600).then(function(r){return enviarMidia('foto',r.blob,'foto.jpg')}).then(function(x){
+        if(x&&x.ok){var t='[['+'foto:'+x.caminho+'|';inserirBloco(t+']]',t.length)}
+        i++;prox()
+      }).catch(function(){toast('Não foi possível ler uma das fotos.',true);i++;prox()});
+    })();
+  });
+  videoIn.addEventListener('change',function(){var f=videoIn.files[0];videoIn.value='';if(!f)return;
+    if(f.size>50*1024*1024){toast('O vídeo passa de 50 MB. Reduza a qualidade ao exportar ou use o link do YouTube.',true);return}
+    ocupado(true,'Enviando o vídeo… pode levar alguns minutos');
+    enviarMidia('video',f,f.name).then(function(x){ocupado(false);if(x.ok){var t='[['+'video:'+x.caminho+'|';inserirBloco(t+']]',t.length);toast('Vídeo enviado. Escreva a legenda, se quiser.')}});
+  });
+  function btn(rot,dica,fn,cls){return h('button'+(cls||''),{type:'button',title:dica,'aria-label':dica,onclick:function(){if(!busy)fn()}},rot)}
+  var barra=h('div.ed-bar',
+    btn('Subtítulo','Subtítulo da seção',function(){prefixarLinhas('## ','Subtítulo')}),
+    btn('Negrito','Negrito',function(){envolver('**','**','texto em destaque')},'.b'),
+    btn('Itálico','Itálico',function(){envolver('*','*','texto')},'.i'),
+    btn('Lista','Lista com marcadores',function(){prefixarLinhas('- ','item')}),
+    btn('Citação','Citação em destaque',function(){prefixarLinhas('> ','citação')}),
+    btn('Link','Link para outra página',function(){var u=window.prompt('Cole o endereço do link (começa com https://)');if(!u)return;u=u.trim();
+      if(!/^(https?:\/\/|\/)\S+$/.test(u)){toast('Endereço inválido. Ele deve começar com https://',true);return}envolver('[','](' +u+')','texto do link')}),
+    btn('Linha','Linha divisória',function(){inserirBloco('---')}),
+    h('span.sep'),
+    btn('📷 Foto','Inserir foto (da galeria ou câmera)',function(){fotos.click()},'.media'),
+    btn('▶ Vídeo','Inserir vídeo',function(){
+      var u=window.prompt('Cole o link do vídeo no YouTube.\n\nPara enviar um vídeo seu (arquivo MP4, até 50 MB), deixe em branco e toque em OK.');
+      if(u===null)return;u=u.trim();
+      if(!u){videoIn.click();return}
+      if(!/^https?:\/\/(www\.|m\.)?(youtube\.com|youtu\.be)\//.test(u)){toast('Use um link do YouTube (youtube.com ou youtu.be).',true);return}
+      var t='[['+'video:'+u+'|';inserirBloco(t+']]',t.length)},'.media'),
+    msg,fotos,videoIn);
+
+  function salvar(ver){return api('artigo_salvar',{id:id,titulo:tit.value,slug:slug.value,categoria:cat.value,resumo:res.value,capa:capa,corpo:corpo.value,status:st.value}).then(function(x){
     if(x.ok){id=x.id;slug.value=x.slug;slugTocado=true;toast(st.value==='publicado'?'Artigo publicado':'Rascunho salvo');if(ver)window.open('previa.php?id='+id,'_blank','noopener')}return x})}
   render(
-    title(id?'Editar artigo':'Novo artigo','Escreva em texto simples. O site cuida da formatação.',h('button.btn.btn-line.btn-sm',{type:'button',onclick:function(){VIEWS.artigos()}},'← Voltar à lista')),
-    h('form.panel.mt',{onsubmit:function(e){e.preventDefault();salvar(false)}},
+    title(id?'Editar artigo':'Novo artigo','Use os botões para formatar. O site cuida do visual.',h('button.btn.btn-line.btn-sm',{type:'button',onclick:function(){VIEWS.artigos()}},'← Voltar à lista')),
+    h('form.panel.mt',{onsubmit:function(e){e.preventDefault();if(busy){toast('Aguarde o envio terminar.',true);return}salvar(false)}},
       h('div.fgrid2',field('Título',tit,true),field('Endereço',slug,false,'(guia/…)'),field('Categoria',cat),field('Resumo',res,true),
         h('datalist',{id:'cats'},['ELEIÇÃO','FINANÇAS','MANUTENÇÃO','ASSEMBLEIA','SEGURANÇA','LEGISLAÇÃO','GESTÃO'].map(function(x){return h('option',{value:x})})),
-        field('Texto',corpo,true),
-        h('div.full.help',h('b','Como formatar: '),'deixe uma linha em branco entre parágrafos · ',h('code','## Subtítulo'),' · ',h('code','- item de lista'),' · ',h('code','**negrito**')),
+        field('Foto de capa',capaIn,true,'(aparece no cartão, no topo do artigo e ao compartilhar · recorte automático panorâmico)'),h('div.full',capaPrev,capaRm),
+        h('div.full.ed',h('label',{htmlFor:'corpo'},'Texto'),barra,corpo),
+        h('div.full.help',h('b','Dicas: '),'deixe uma linha em branco entre parágrafos. Ao inserir uma foto ou vídeo, escreva a legenda depois do traço ',h('code','|'),' (ex.: ',h('code','[[foto:…|Assembleia de março]]'),'). Vídeos do YouTube: cole o link. Use ',h('b','Salvar e ver'),' para conferir como fica no site.'),
         field('Situação',st),
-        h('div.right.end',h('button.btn.btn-line',{type:'button',onclick:function(){salvar(true)}},'Salvar e ver'),h('button.btn.btn-ink',{type:'submit'},'Salvar'))))
+        h('div.right.end',h('button.btn.btn-line',{type:'button',onclick:function(){if(busy){toast('Aguarde o envio terminar.',true);return}salvar(true)}},'Salvar e ver'),h('button.btn.btn-ink',{type:'submit'},'Salvar'))))
   );
 }
+
+/* ================= usuários e minha conta ================= */
+function copiar(txt,msg){try{navigator.clipboard.writeText(txt).then(function(){toast(msg||'Copiado')},function(){window.prompt('Copie:',txt)})}catch(x){window.prompt('Copie:',txt)}}
+function codigosBox(cods,titulo){
+  return h('div.panel.invite-ok',h('h3',titulo||'Novos códigos de recuperação'),
+    h('div.pad',h('p','Guarde estes códigos agora: eles não serão mostrados de novo e os códigos antigos deixaram de valer. Cada código vale para uma única entrada.'),
+      h('ul.rec-codes',cods.map(function(c){return h('li',c)})),
+      h('div.copyrow',h('button.btn.btn-ink.btn-sm',{type:'button',onclick:function(){copiar(cods.join('\n'),'Códigos copiados')}},'Copiar códigos'))));
+}
+function conviteBox(x){
+  var link=h('input',{readOnly:true,value:x.link,'aria-label':'Link de acesso',onclick:function(){this.select()}}),primeiro=String(x.nome).split(' ')[0];
+  return h('div.panel.invite-ok',h('h3','Link de acesso para '+x.nome),
+    h('div.pad',h('p',x.email_enviado?'Enviamos este link para '+x.email+'. Se não chegar (olhe o spam), copie e envie você mesmo:':'Não foi possível enviar e-mail automaticamente. Copie o link e envie para '+x.nome+' por WhatsApp ou e-mail:'),
+      h('div.copyrow',link,h('button.btn.btn-ink.btn-sm',{type:'button',onclick:function(){copiar(x.link,'Link copiado')}},'Copiar link'),
+        h('a.btn.btn-line.btn-sm',{href:'https://wa.me/?text='+encodeURIComponent('Olá '+primeiro+'! Segue o link para criar seu acesso ao painel do site JC Síndico (vale por 48 horas): '+x.link),target:'_blank',rel:'noopener'},'Enviar por WhatsApp')),
+      h('small.muted','Este link só aparece agora e vale por 48 horas. Quem tiver o link consegue criar a senha: envie somente para a pessoa certa. Ela também vai precisar de um aplicativo autenticador no celular.')));
+}
+/* Confirmação de ações sensíveis: pede de novo a senha e o código atual do aplicativo. fn(senha,codigo) devolve Promise<boolean> */
+function pedirAutorizacao(titulo,fn){
+  var s=h('input',{type:'password',autocomplete:'current-password',required:true}),c=h('input',{inputMode:'numeric',autocomplete:'one-time-code',maxLength:7,required:true,placeholder:'6 dígitos'}),dlg=h('dialog.reauth');
+  function fechar(){try{dlg.close()}catch(x){}dlg.remove()}
+  var f=h('form',{onsubmit:function(e){e.preventDefault();var b=f.querySelector('[type=submit]');b.disabled=true;
+      fn(s.value,c.value).then(function(ok){b.disabled=false;if(ok)fechar();else{c.value='';c.focus()}})}},
+    h('h3',titulo),h('p.muted','Por segurança, confirme sua senha e o código atual do aplicativo (6 dígitos).'),
+    field('Sua senha',s),field('Código do aplicativo',c),
+    h('div.right',h('button.btn.btn-line',{type:'button',onclick:fechar},'Cancelar'),h('button.btn.btn-ink',{type:'submit'},'Confirmar')));
+  dlg.appendChild(f);dlg.addEventListener('cancel',function(){dlg.remove()});document.body.appendChild(dlg);
+  if(dlg.showModal)dlg.showModal();else dlg.setAttribute('open','');
+  s.focus();
+}
+
+VIEWS.usuarios=function(extra){
+  get('usuarios').then(function(r){if(!r.ok)return;
+    var eu=r.usuarios.filter(function(u){return u.eu})[0]||{};
+    var SIT={ativo:['Ativo','p-ok'],convite:['Convite pendente','p-warn'],convite_expirado:['Convite expirado','p-bad'],redefinindo:['Redefinindo senha','p-warn'],desativado:['Desativado','p-mute']};
+    function resp(x){if(x.ok&&x.link)VIEWS.usuarios({convite:x});else if(x.ok)VIEWS.usuarios()}
+    var lista=h('ul.list.users',r.usuarios.map(function(u){
+      var pend=u.situacao==='convite'||u.situacao==='convite_expirado';
+      return h('li.user-li',h('div.t',h('b',u.nome+(u.eu?' (você)':'')),h('small',u.email+' · '+(u.ultimo_login_fmt?'último acesso '+u.ultimo_login_fmt:'ainda não entrou')+(u.convite_expira_fmt&&(pend||u.situacao==='redefinindo')?' · link válido até '+u.convite_expira_fmt:''))),
+        h('span.acts-cell',pill('Master','p-info'),pill(SIT[u.situacao][0],SIT[u.situacao][1]),u.totp_ativo?pill('2 etapas ativa','p-ok'):pill('2 etapas pendente','p-warn'),
+          u.eu?null:[
+            u.situacao!=='desativado'?h('button.btn.btn-line.btn-sm',{type:'button',onclick:function(){if(confirmar(pend?'Gerar um novo convite para '+u.nome+'? O link anterior deixa de valer.':'Gerar um link para '+u.nome+' criar uma nova senha? Ela continua entrando com a senha atual até usar o link.'))pedirAutorizacao(pend?'Novo convite para '+u.nome:'Redefinir senha de '+u.nome,function(sn,cd){return api('usuario_convite_novo',{id:u.id,senha:sn,codigo:cd}).then(function(x){if(x.ok){resp(x);return true}return false})})}},pend?'Novo convite':'Redefinir senha'):null,
+            u.totp_ativo?h('button.btn.btn-line.btn-sm',{type:'button',onclick:function(){if(confirmar('Redefinir a verificação em 2 etapas de '+u.nome+'? A senha atual dela deixa de valer: ela receberá um link para criar uma nova senha e configurar o aplicativo de novo, e as sessões abertas dela caem.'))pedirAutorizacao('Redefinir 2 etapas de '+u.nome,function(sn,cd){return api('usuario_2fa_reset',{id:u.id,senha:sn,codigo:cd}).then(function(x){if(x.ok){resp(x);return true}return false})})}},'Redefinir 2 etapas'):null,
+            h('button.btn.btn-line.btn-sm',{type:'button',onclick:function(){var des=u.situacao!=='desativado';if(!des||confirmar('Desativar o acesso de '+u.nome+'? Ela perde o acesso na hora.'))api('usuario_status',{id:u.id,ativo:des?0:1}).then(function(x){if(x.ok){toast(des?'Acesso desativado':'Acesso reativado');VIEWS.usuarios()}})}},u.situacao==='desativado'?'Reativar':'Desativar'),
+            h('button.btn.btn-line.btn-sm.danger',{type:'button',onclick:function(){if(confirmar('Remover '+u.nome+' definitivamente?'))pedirAutorizacao('Remover '+u.nome,function(sn,cd){return api('usuario_excluir',{id:u.id,senha:sn,codigo:cd}).then(function(x){if(x.ok){toast('Usuário removido');VIEWS.usuarios();return true}return false})})}},'Remover')]));
+    }));
+
+    var cNome=h('input',{maxLength:80,required:true,placeholder:'Nome da pessoa'}),cEmail=h('input',{type:'email',maxLength:160,required:true,placeholder:'email@exemplo.com',autocomplete:'off'});
+    var convForm=h('form.inline-form.bl-form',{onsubmit:function(e){e.preventDefault();var nome=cNome.value,email=cEmail.value;pedirAutorizacao('Convidar '+nome,function(sn,cd){return api('usuario_convidar',{nome:nome,email:email,senha:sn,codigo:cd}).then(function(x){if(x.ok){resp(x);return true}return false})})}},
+      field('Nome',cNome),field('E-mail',cEmail),h('button.btn.btn-ink.btn-sm',{type:'submit'},'Convidar'));
+
+    /* minha conta */
+    var at=h('input',{type:'password',autocomplete:'current-password',required:true}),nv=h('input',{type:'password',autocomplete:'new-password',required:true,minLength:10}),nv2=h('input',{type:'password',autocomplete:'new-password',required:true,minLength:10}),cod=h('input',{inputMode:'numeric',autocomplete:'one-time-code',maxLength:7,required:true,placeholder:'6 dígitos'});
+    var fs=h('form.panel',{onsubmit:function(e){e.preventDefault();if(nv.value!==nv2.value){toast('As senhas novas não conferem',true);return}
+        api('senha',{atual:at.value,nova:nv.value,codigo:cod.value}).then(function(x){if(x.ok){toast('Senha alterada');fs.reset()}})}},
+      h('h3','Trocar minha senha'),h('div.fgrid2',field('Senha atual',at),field('Código do aplicativo',cod,false,'(2 etapas)'),field('Nova senha',nv,false,'(mín. 10, letras e números)'),field('Repita a nova senha',nv2),h('div.full.right',h('button.btn.btn-ink',{type:'submit'},'Trocar senha'))));
+
+    function formSeguro(txt,botao,perigo,fn){
+      var s=h('input',{type:'password',autocomplete:'current-password',required:true}),c=h('input',{inputMode:'numeric',autocomplete:'one-time-code',maxLength:7,required:true,placeholder:'6 dígitos'});
+      var f=h('form.inline-form.bl-form',{onsubmit:function(e){e.preventDefault();fn(s.value,c.value,f)}},field('Senha atual',s),field('Código do aplicativo',c),h('button.btn.btn-sm'+(perigo?'.danger.btn-line':'.btn-ink'),{type:'submit'},botao));
+      return h('div',h('p.muted',txt),f)}
+    var seguranca=h('div.panel',h('h3','Verificação em 2 etapas'),
+      h('div.pad',h('p',eu.totp_ativo?'Ativa. Você ainda tem '+eu.recuperacao+(eu.recuperacao===1?' código de recuperação.':' códigos de recuperação.')+(eu.recuperacao<=2?' Gere novos em breve.':''):'Não configurada.')),
+      h('div.pad.two',
+        formSeguro('Gerar 10 novos códigos de recuperação (os atuais deixam de valer):','Gerar novos códigos',false,function(s,c,f){api('codigos_novos',{senha:s,codigo:c}).then(function(x){if(x.ok){f.reset();VIEWS.usuarios({codigos:x.codigos})}})}),
+        formSeguro('Trocou de celular? Reconfigure a verificação: você sai agora e configura o novo aparelho ao entrar de novo.','Reconfigurar 2 etapas',true,function(s,c){if(confirmar('Isto encerra a sua sessão. Continuar?'))api('usuario_2fa_reset',{id:eu.id,senha:s,codigo:c}).then(function(x){if(x.ok)location.reload()})})));
+
+    render(
+      title('Usuários','Quem tem acesso ao painel. Todos têm o perfil Master: acesso total e podem convidar outras pessoas. Todo acesso exige senha e verificação em 2 etapas.'),
+      extra&&extra.convite?conviteBox(extra.convite):null,
+      extra&&extra.codigos?codigosBox(extra.codigos):null,
+      h('div.panel.mt',h('h3','Pessoas com acesso'),lista),
+      h('div.panel',h('h3','Convidar uma pessoa'),h('div.pad',h('p.muted','Ela recebe um link (válido por 48 horas) para criar a senha e ativar a verificação em 2 etapas.')),convForm),
+      h('h3.sec','Minha conta · '+eu.nome),fs,seguranca
+    );
+  });
+};
+
+/* ================= registros de atividade ================= */
+VIEWS.logs=function(){
+  var F={cat:'',nivel:'',dias:7,q:''},corpo=h('div.logs'),topo=h('div.log-top'),maisBtn=h('button.btn.btn-line.btn-sm',{type:'button',hidden:true},'Mostrar mais'),ultimoId=0,busca,n=0;
+  var CATS=[['','Tudo'],['acesso','Acessos'],['seguranca','Segurança'],['painel','Ações no painel'],['site','Envios do site']],
+      NIV={info:'p-info',aviso:'p-warn',alerta:'p-bad'};
+  function linha(l){
+    var quem=l.usuario_nome||l.email||(l.categoria==='site'?'Visitante':'—');
+    return h('div.log-row.n-'+l.nivel,h('time',l.criado_fmt),
+      h('div.log-ev',pill(l.rotulo,NIV[l.nivel]),l.detalhe?h('small',l.detalhe):null),
+      h('div.log-who',h('b',quem),l.usuario_nome&&l.email?h('small',l.email):null),
+      h('code.log-ip',{title:l.agente||''},l.ip));
+  }
+  function qs(extra){var q='';Object.keys(F).forEach(function(k){if(F[k]!==''&&F[k]!=null)q+='&'+k+'='+encodeURIComponent(F[k])});return q+(extra||'')}
+  function carregar(mais){
+    var ref=++n;
+    get('logs',Object.assign({},F,mais?{antes:ultimoId}:{})).then(function(r){if(!r.ok||ref!==n)return;
+      if(!mais){corpo.textContent='';resumo(r)}
+      if(!r.logs.length&&!mais)corpo.appendChild(h('p.empty','Nenhum registro com estes filtros.'));
+      r.logs.forEach(function(l){corpo.appendChild(linha(l));ultimoId=l.id});
+      maisBtn.hidden=!r.mais;
+    });
+  }
+  function resumo(r){
+    topo.textContent='';
+    var s=r.resumo;
+    topo.appendChild(h('div.grid4.log-sum',
+      h('div.tile',h('small','Entradas (24 h)'),h('strong',s.logins)),
+      h('div.tile'+(s.falhas?'.warn':''),h('small','Tentativas que falharam (24 h)'),h('strong',s.falhas)),
+      h('div.tile'+(s.bloqueios?'.bad':''),h('small','Bloqueios (24 h)'),h('strong',s.bloqueios)),
+      h('div.tile'+(s.alertas?'.bad':''),h('small','Alertas (24 h)'),h('strong',s.alertas))));
+    if(r.suspeitos.length)topo.appendChild(h('div.panel.sus',h('h3','Endereços com muitas tentativas nas últimas 24 horas'),
+      h('ul.list',r.suspeitos.map(function(x){return h('li',h('div.t',h('b',x.ip),h('small',x.n+' tentativas · '+x.emails+(x.emails==1?' e-mail diferente':' e-mails diferentes')+' · última '+x.ultimo_fmt)),
+        h('button.btn.btn-line.btn-sm',{type:'button',onclick:function(){F.q=x.ip;busca.value=x.ip;carregar(false)}},'Ver registros'))}))));
+  }
+  var chips=h('div.chips-adm',CATS.map(function(c){var b=h('button',{type:'button','aria-pressed':String(F.cat===c[0])},c[1]);
+    b.addEventListener('click',function(){F.cat=c[0];$$('button',chips).forEach(function(x){x.setAttribute('aria-pressed','false')});b.setAttribute('aria-pressed','true');carregar(false)});return b}));
+  var dias=h('select',[[1,'Últimas 24 horas'],[7,'Últimos 7 dias'],[30,'Últimos 30 dias'],[90,'Últimos 90 dias'],[0,'Tudo (até 180 dias)']].map(function(x){return h('option',{value:x[0]},x[1])})),
+      niv=h('select',[['','Todos os níveis'],['aviso','Só avisos e alertas'],['alerta','Só alertas']].map(function(x){return h('option',{value:x[0]},x[1])}));
+  dias.value=String(F.dias);
+  dias.addEventListener('change',function(){F.dias=parseInt(dias.value,10);carregar(false)});niv.addEventListener('change',function(){F.nivel=niv.value;carregar(false)});
+  busca=h('input',{type:'search',placeholder:'Buscar por IP, e-mail, nome ou detalhe',maxLength:80,'aria-label':'Buscar nos registros'});
+  var t;busca.addEventListener('input',function(){clearTimeout(t);t=setTimeout(function(){F.q=busca.value.trim();carregar(false)},350)});
+  maisBtn.addEventListener('click',function(){carregar(true)});
+  var csv=h('a.btn.btn-line.btn-sm',{href:'#',target:'_blank',rel:'noopener'},'Baixar planilha (CSV)');
+  csv.addEventListener('click',function(){csv.href=API+'?acao=logs_csv'+qs()});
+  render(
+    title('Registros','Tudo o que acontece no site e no painel: entradas, tentativas de acesso, ações feitas e envios de visitantes. Guardados por 180 dias, com o endereço IP de cada evento.',csv),
+    topo,
+    h('div.panel.mt',h('div.log-filters',chips,h('div.log-sel',dias,niv,busca)),corpo,h('div.pad.center',maisBtn))
+  );
+  carregar(false);
+};
 
 /* ================= configurações ================= */
 VIEWS.config=function(){
@@ -317,16 +568,12 @@ VIEWS.config=function(){
       F[x[0]]=[x[1],h('input',{type:x[2]||'text',value:c[x[0]]||''})]});
     var form=h('form.panel.mt',{onsubmit:function(e){e.preventDefault();var d={};Object.keys(F).forEach(function(k){d[k]=F[k][1].value});api('config_salvar',d).then(function(x){if(x.ok)toast('Alterações salvas. Já aparecem no site.')})}},
       h('h3','Dados de contato e endereço'),h('div.fgrid2',Object.keys(F).map(function(k){return field(F[k][0],F[k][1])}),h('div.full.right',h('button.btn.btn-ink',{type:'submit'},'Salvar alterações'))));
-    var at=h('input',{type:'password',autocomplete:'current-password',required:true}),nv=h('input',{type:'password',autocomplete:'new-password',required:true,minLength:10}),nv2=h('input',{type:'password',autocomplete:'new-password',required:true,minLength:10});
-    var fs=h('form.panel',{onsubmit:function(e){e.preventDefault();if(nv.value!==nv2.value){toast('As senhas novas não conferem',true);return}
-        api('senha',{atual:at.value,nova:nv.value}).then(function(x){if(x.ok){toast('Senha alterada');fs.reset()}})}},
-      h('h3','Trocar senha · '+r.email),h('div.fgrid2',field('Senha atual',at,true),field('Nova senha',nv,false,'(mín. 10, letras e números)'),field('Repita a nova senha',nv2),h('div.full.right',h('button.btn.btn-ink',{type:'submit'},'Trocar senha'))));
-    render(title('Configurações','Dados que aparecem em todo o site.'),form,fs);
+    render(title('Configurações','Dados que aparecem em todo o site. A troca de senha fica em Usuários → Minha conta.'),form);
   });
 };
 
 /* início: abre a aba do endereço (#contatos etc.) e atualiza os contadores */
 var start=(location.hash||'').slice(1);
 show(VIEWS[start]?start:'geral');
-if(start&&start!=='geral')get('resumo').then(function(r){if(r.ok){badge('b-novos',r.pend.novos);badge('b-agenda',r.pend.agenda);badge('b-depo',r.pend.depo)}});
+if(start&&start!=='geral')get('resumo').then(function(r){if(r.ok){badge('b-novos',r.pend.novos);badge('b-agenda',r.pend.agenda);badge('b-depo',r.pend.depo);badge('b-logs',r.alertas24)}});
 })();

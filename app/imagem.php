@@ -99,3 +99,53 @@ function imagem_apagar(?string $rel): void
         @unlink($f);
     }
 }
+
+/** Reduz mantendo a proporção: o maior lado passa a ter no máximo $maxLado px. */
+function imagem_reduzir($src, int $maxLado = 1600)
+{
+    $w = imagesx($src);
+    $h = imagesy($src);
+    if (max($w, $h) <= $maxLado) {
+        return $src;
+    }
+    $f = $maxLado / max($w, $h);
+    $nw = max(1, (int) round($w * $f));
+    $nh = max(1, (int) round($h * $f));
+    $dst = imagecreatetruecolor($nw, $nh);
+    imagecopyresampled($dst, $src, 0, 0, 0, 0, $nw, $nh, $w, $h);
+    return $dst;
+}
+
+const JC_VIDEO_MAX = 50 * 1024 * 1024; // 50 MB
+
+/**
+ * Valida e guarda um vídeo MP4 em uploads/<pasta>/. Não dá para recodificar vídeo na hospedagem
+ * compartilhada, então a checagem é rígida: tamanho, tipo real (finfo) e assinatura "ftyp" do MP4.
+ * @return string caminho relativo ao site, ou mensagem de erro iniciada por "!"
+ */
+function upload_video_salvar(array $f, string $pasta): string
+{
+    if (!isset($f['error']) || is_array($f['error'])) {
+        return '!Envio inválido.';
+    }
+    if ($f['error'] === UPLOAD_ERR_INI_SIZE || $f['error'] === UPLOAD_ERR_FORM_SIZE || ($f['size'] ?? 0) > JC_VIDEO_MAX) {
+        return '!O vídeo passa de 50 MB. Reduza a qualidade ao exportar ou use o link do YouTube.';
+    }
+    if ($f['error'] !== UPLOAD_ERR_OK || !is_uploaded_file($f['tmp_name'])) {
+        return '!Não foi possível receber o vídeo.';
+    }
+    $mime = (new finfo(FILEINFO_MIME_TYPE))->file($f['tmp_name']);
+    $cab = (string) file_get_contents($f['tmp_name'], false, null, 0, 12);
+    if ($mime !== 'video/mp4' || substr($cab, 4, 4) !== 'ftyp') {
+        return '!Envie o vídeo em formato MP4 (ou use o link do YouTube).';
+    }
+    $dir = JC_ROOT . '/uploads/' . $pasta;
+    if (!is_dir($dir) && !mkdir($dir, 0755, true) && !is_dir($dir)) {
+        throw new RuntimeException('Pasta de upload indisponível');
+    }
+    $arq = bin2hex(random_bytes(10)) . '.mp4';
+    if (!move_uploaded_file($f['tmp_name'], $dir . '/' . $arq)) {
+        return '!Não foi possível guardar o vídeo.';
+    }
+    return 'uploads/' . $pasta . '/' . $arq;
+}

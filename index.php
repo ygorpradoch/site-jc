@@ -291,7 +291,7 @@ layout_head([
       </div>
       <div class="posts">
         <?php foreach ($posts as $p): ?>
-        <a class="post" href="<?= e(url('guia/' . $p['slug'])) ?>"><span class="meta"><?= e(mb_strtoupper($p['categoria'])) ?> · <?= (int) $p['minutos'] ?> MIN</span><span class="pt"><?= e($p['titulo']) ?></span><p><?= e($p['resumo']) ?></p><span class="more">Ler artigo</span></a>
+        <?= post_card($p) ?>
         <?php endforeach; ?>
       </div>
     </div>

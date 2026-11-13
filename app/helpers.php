@@ -154,9 +154,14 @@ function same_origin(): bool
  * Limite de tentativas por janela de tempo.
  * Retorna true se ainda pode; registra a tentativa quando $hit = true.
  */
-function rate_ok(string $acao, int $max, int $janelaSeg, bool $hit = true, ?string $extra = null): bool
+function rate_chave(string $acao, ?string $extra, bool $comIp): string
 {
-    $chave = substr($acao . ':' . ip_hash() . ($extra !== null ? ':' . hash('sha256', $extra) : ''), 0, 190);
+    return substr($acao . ':' . ($comIp ? ip_hash() : '*') . ($extra !== null ? ':' . hash('sha256', $extra) : ''), 0, 190);
+}
+
+function rate_ok(string $acao, int $max, int $janelaSeg, bool $hit = true, ?string $extra = null, bool $comIp = true): bool
+{
+    $chave = rate_chave($acao, $extra, $comIp);
     $agora = time();
     db_q('DELETE FROM rate_limits WHERE expira_em < ?', [$agora]);
     $row = db_one('SELECT tentativas FROM rate_limits WHERE chave = ?', [$chave]);
@@ -173,10 +178,26 @@ function rate_ok(string $acao, int $max, int $janelaSeg, bool $hit = true, ?stri
     return true;
 }
 
-function rate_clear(string $acao, ?string $extra = null): void
+/**
+ * Conta UMA tentativa e diz se ainda está dentro do limite. Incrementa ANTES de verificar (atômico no banco),
+ * então requisições paralelas não conseguem "furar" o limite como no par rate_ok + rate_ok(hit).
+ */
+function rate_contar(string $acao, int $max, int $janelaSeg, ?string $extra = null, bool $comIp = true): bool
 {
-    $chave = substr($acao . ':' . ip_hash() . ($extra !== null ? ':' . hash('sha256', $extra) : ''), 0, 190);
-    db_q('DELETE FROM rate_limits WHERE chave = ?', [$chave]);
+    $chave = rate_chave($acao, $extra, $comIp);
+    $agora = time();
+    db_q('DELETE FROM rate_limits WHERE expira_em < ?', [$agora]);
+    db_q(
+        'INSERT INTO rate_limits (chave, tentativas, expira_em) VALUES (?, 1, ?)
+         ON DUPLICATE KEY UPDATE tentativas = tentativas + 1',
+        [$chave, $agora + $janelaSeg]
+    );
+    return (int) db_val('SELECT tentativas FROM rate_limits WHERE chave = ?', [$chave]) <= $max;
+}
+
+function rate_clear(string $acao, ?string $extra = null, bool $comIp = true): void
+{
+    db_q('DELETE FROM rate_limits WHERE chave = ?', [rate_chave($acao, $extra, $comIp)]);
 }
 
 /** Barreira comum dos formulários públicos: método, origem, honeypot e limite. */
@@ -184,32 +205,30 @@ function public_guard(string $acao, int $max, int $janela): array
 {
     require_method('POST');
     if (!same_origin()) {
+        log_evento('origem_invalida', 'Formulário: ' . $acao);
         json_fail('Requisição inválida.', 403);
     }
     $in = input();
     // Campo invisível: robôs preenchem, pessoas não.
     if (!empty($in['site_url'])) {
+        log_evento('honeypot', 'Formulário: ' . $acao);
         json_out(['ok' => true]);
     }
     if (!rate_ok($acao, $max, $janela)) {
+        log_evento('limite_excedido', 'Formulário: ' . $acao);
         json_fail('Muitas tentativas seguidas. Tente de novo em alguns minutos ou chame no WhatsApp.', 429);
     }
     return $in;
 }
 
-/* ---------- e-mail de aviso ---------- */
-function notify(string $assunto, array $linhas): void
+/* ---------- e-mail ---------- */
+/** Envia um e-mail de texto simples pelo remetente configurado (mail_from). Retorna false se não puder enviar. */
+function email_enviar(string $para, string $assunto, string $corpo): bool
 {
-    $to = setting('email_contato');
     $from = (string) cfg('mail_from', '');
-    if (!$to || !filter_var($to, FILTER_VALIDATE_EMAIL) || !filter_var($from, FILTER_VALIDATE_EMAIL)) {
-        return;
+    if (!filter_var($para, FILTER_VALIDATE_EMAIL) || !filter_var($from, FILTER_VALIDATE_EMAIL)) {
+        return false;
     }
-    $corpo = '';
-    foreach ($linhas as $k => $v) {
-        $corpo .= (is_int($k) ? '' : $k . ': ') . $v . "\n";
-    }
-    $corpo .= "\nAbra o painel: " . abs_url('admin/') . "\n";
     $assunto = '=?UTF-8?B?' . base64_encode(clean_line($assunto, 150)) . '?=';
     $headers = [
         'From: JC Síndico (site) <' . $from . '>',
@@ -217,7 +236,26 @@ function notify(string $assunto, array $linhas): void
         'Content-Type: text/plain; charset=UTF-8',
         'Content-Transfer-Encoding: 8bit',
     ];
-    @mail($to, $assunto, $corpo, implode("\r\n", $headers), '-f' . $from);
+    return (bool) @mail($para, $assunto, $corpo, implode("
+", $headers), '-f' . $from);
+}
+
+/** Aviso de novo contato para o e-mail configurado no painel. */
+function notify(string $assunto, array $linhas): void
+{
+    $to = setting('email_contato');
+    if (!$to) {
+        return;
+    }
+    $corpo = '';
+    foreach ($linhas as $k => $v) {
+        $corpo .= (is_int($k) ? '' : $k . ': ') . $v . "
+";
+    }
+    $corpo .= "
+Abra o painel: " . abs_url('admin/') . "
+";
+    email_enviar((string) $to, $assunto, $corpo);
 }
 
 /* ---------- utilidades de data ---------- */

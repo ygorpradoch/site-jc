@@ -26,7 +26,8 @@ return [
     // E-mail criado no hPanel (ex.: site@juniorsindico.pro) usado como remetente dos avisos
     'mail_from' => 'site@juniorsindico.pro',
 
-    // Chave secreta longa e aleatória (64 caracteres). Usada para anonimizar IPs.
+    // Chave secreta longa e aleatória (64 caracteres, mínimo 32). Anonimiza IPs e CIFRA os segredos da
+    // verificação em 2 etapas: NÃO troque depois de em uso (todos teriam de reconfigurar o 2FA).
     'app_secret' => 'TROQUE-POR-64-CARACTERES-ALEATORIOS',
 
     // Código exigido UMA vez para criar o primeiro administrador em /admin.

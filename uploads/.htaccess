@@ -1,4 +1,4 @@
-# Pasta de envios: só imagens; nenhum script é executado aqui
+# Pasta de envios: só imagens e vídeo MP4; nenhum script é executado aqui
 Options -Indexes -ExecCGI
 RemoveHandler .php .phtml .php3 .php4 .php5 .php7 .php8 .phar .pl .py .cgi .sh
 RemoveType .php .phtml .php3 .php4 .php5 .php7 .php8 .phar
@@ -7,7 +7,7 @@ RemoveType .php .phtml .php3 .php4 .php5 .php7 .php8 .phar
 <FilesMatch ".*">
 Require all denied
 </FilesMatch>
-<FilesMatch "\.(webp|jpe?g|png)$">
+<FilesMatch "\.(webp|jpe?g|png|mp4)$">
 Require all granted
 </FilesMatch>
 </IfModule>
@@ -16,7 +16,7 @@ Require all granted
 Order deny,allow
 Deny from all
 </FilesMatch>
-<FilesMatch "\.(webp|jpe?g|png)$">
+<FilesMatch "\.(webp|jpe?g|png|mp4)$">
 Order allow,deny
 Allow from all
 </FilesMatch>

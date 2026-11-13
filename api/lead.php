@@ -30,6 +30,9 @@ db_q(
     [$diagId > 0 ? 'diagnostico' : 'proposta', $nome, $wa, $papel, $cond ?: null, $unid, $msg ?: null, ip_hash()]
 );
 
+$leadNovo = (int) db()->lastInsertId();
+log_evento('proposta_enviada', 'Contato #' . $leadNovo . ($diagId > 0 ? ' (veio do diagnóstico)' : ''));
+
 if ($diagId > 0) {
     db_q('UPDATE diagnosticos SET enviou_formulario = 1 WHERE id = ? AND criado_em > NOW() - INTERVAL 1 DAY', [$diagId]);
 }

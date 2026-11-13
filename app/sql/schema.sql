@@ -9,9 +9,18 @@ CREATE TABLE IF NOT EXISTS usuarios (
   nome          VARCHAR(80)  NOT NULL,
   email         VARCHAR(160) NOT NULL,
   senha_hash    VARCHAR(255) NOT NULL,
+  ativo               TINYINT(1)   NOT NULL DEFAULT 1,
+  totp_segredo        VARCHAR(255) NULL,          -- segredo da 2ª etapa, cifrado com a app_secret
+  totp_ativo          TINYINT(1)   NOT NULL DEFAULT 0,
+  totp_passo          BIGINT       NULL,          -- último código aceito (impede reuso)
+  codigos_recuperacao TEXT         NULL,          -- lista JSON de hashes dos códigos de recuperação
+  convite_hash        CHAR(64)     NULL,          -- hash do link de convite / redefinição de senha
+  convite_expira      DATETIME     NULL,
+  criado_por          INT UNSIGNED NULL,
   criado_em     DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
   ultimo_login  DATETIME     NULL,
-  UNIQUE KEY uq_email (email)
+  UNIQUE KEY uq_email (email),
+  KEY idx_convite (convite_hash)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS rate_limits (
@@ -116,6 +125,7 @@ CREATE TABLE IF NOT EXISTS artigos (
   categoria      VARCHAR(40)  NOT NULL DEFAULT 'GESTÃO',
   minutos        TINYINT UNSIGNED NOT NULL DEFAULT 3,
   resumo         VARCHAR(300) NOT NULL DEFAULT '',
+  capa           VARCHAR(120) NULL,
   corpo          MEDIUMTEXT   NOT NULL,
   status         ENUM('rascunho','publicado') NOT NULL DEFAULT 'rascunho',
   leituras       INT UNSIGNED NOT NULL DEFAULT 0,
@@ -123,4 +133,23 @@ CREATE TABLE IF NOT EXISTS artigos (
   atualizado_em  DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   UNIQUE KEY uq_slug (slug),
   KEY idx_status (status, publicado_em)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Registros de atividade (acessos, segurança, ações no painel e envios do site). Guardados por 180 dias.
+CREATE TABLE IF NOT EXISTS logs (
+  id            BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  criado_em     DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  categoria     ENUM('acesso','seguranca','painel','site') NOT NULL,
+  evento        VARCHAR(40)  NOT NULL,
+  nivel         ENUM('info','aviso','alerta') NOT NULL DEFAULT 'info',
+  usuario_id    INT UNSIGNED NULL,
+  usuario_nome  VARCHAR(80)  NULL,
+  email         VARCHAR(160) NULL,
+  ip            VARCHAR(45)  NOT NULL DEFAULT '',
+  agente        VARCHAR(200) NULL,
+  detalhe       VARCHAR(500) NULL,
+  KEY idx_criado (criado_em),
+  KEY idx_cat (categoria, criado_em),
+  KEY idx_nivel (nivel, criado_em),
+  KEY idx_ip (ip, criado_em)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

@@ -1,8 +1,8 @@
 <?php
 /**
- * Guia do condomínio.
- *   /guia           → lista de artigos
- *   /guia/<slug>    → artigo (o .htaccess reescreve para guia.php?slug=...)
+ * Guia do condomínio (blog do Junior).
+ *   /guia                              → lista (filtro ?categoria=, paginação ?pagina=)
+ *   /guia/<slug>                       → artigo (o .htaccess reescreve para guia.php?slug=...)
  * admin/previa.php inclui este arquivo com $JC_PREVIA definido para mostrar rascunhos.
  */
 if (!defined('JC')) {
@@ -31,30 +31,32 @@ if ($previa !== null) {
 }
 
 if ($art) {
-    $outros = db_all("SELECT slug, titulo, categoria, minutos FROM artigos WHERE status = 'publicado' AND id <> ? ORDER BY publicado_em DESC LIMIT 3", [(int) ($art['id'] ?? 0)]);
-    if ($previa === null) {
-        header('Cache-Control: public, max-age=600');
-    } else {
-        header('Cache-Control: no-store');
-    }
+    $outros = artigos_relacionados((int) ($art['id'] ?? 0), (string) $art['categoria'], 3);
+    header('Cache-Control: ' . ($previa === null ? 'public, max-age=600' : 'no-store'));
+    $capa = capa_url($art['capa'] ?? null);
+    $linkArt = abs_url('guia/' . $art['slug']);
+    $imgSocial = $capa ? $art['capa'] : 'assets/img/og.jpg';
     layout_head([
         'title' => $art['titulo'] . ' | Guia do condomínio · JC Síndico',
         'desc' => $art['resumo'],
         'path' => 'guia/' . $art['slug'],
         'type' => 'article',
+        'image' => $imgSocial,
         'robots' => $previa !== null ? 'noindex, nofollow' : null,
         'jsonld' => [
             '@context' => 'https://schema.org',
             '@type' => 'Article',
             'headline' => $art['titulo'],
             'description' => $art['resumo'],
+            'image' => [abs_url($imgSocial)],
             'datePublished' => $art['publicado_em'] ? date('c', strtotime($art['publicado_em'])) : null,
             'dateModified' => date('c', strtotime($art['atualizado_em'] ?? 'now')),
             'author' => ['@type' => 'Person', 'name' => 'Junior Chagas'],
             'publisher' => ['@type' => 'Organization', 'name' => 'JC Síndico Profissional', 'logo' => ['@type' => 'ImageObject', 'url' => abs_url('assets/img/logo-v-azul.svg')]],
-            'mainEntityOfPage' => abs_url('guia/' . $art['slug']),
+            'mainEntityOfPage' => $linkArt,
         ],
     ]);
+    $textoShare = $art['titulo'] . ' — Guia do condomínio, Junior Chagas';
     ?>
 <body class="sub">
 <?php if ($previa !== null): ?><div class="preview-bar">PRÉ-VISUALIZAÇÃO · <?= $art['status'] === 'publicado' ? 'artigo publicado' : 'rascunho, ainda não aparece no site' ?></div><?php endif; ?>
@@ -66,9 +68,21 @@ if ($art) {
     <h1><?= e($art['titulo']) ?></h1>
     <?php if ($art['resumo']): ?><p class="art-lead"><?= e($art['resumo']) ?></p><?php endif; ?>
     <div class="art-by"><img src="<?= e(url('assets/img/junior-foto.webp')) ?>" alt="" width="44" height="44"><span><b>Junior Chagas</b>Síndico profissional<?= $art['publicado_em'] ? ' · ' . e(fmt_data($art['publicado_em'])) : '' ?></span></div>
+    <?php if ($capa): ?><figure class="art-cover"><img src="<?= e($capa) ?>" alt="" width="1200" height="630" fetchpriority="high"></figure><?php endif; ?>
     <div class="art-body">
       <?= artigo_html((string) $art['corpo']) ?>
     </div>
+    <?php if ($previa === null): ?>
+    <div class="art-share" data-share data-url="<?= e($linkArt) ?>" data-title="<?= e($art['titulo']) ?>">
+      <b>Compartilhe com quem precisa ler</b>
+      <div class="sh-btns">
+        <a class="btn btn-line btn-sm" href="https://wa.me/?text=<?= e(rawurlencode($textoShare . "\n" . $linkArt)) ?>" target="_blank" rel="noopener noreferrer"><?= JC_WA_SVG ?> WhatsApp</a>
+        <a class="btn btn-line btn-sm" href="https://www.linkedin.com/sharing/share-offsite/?url=<?= e(rawurlencode($linkArt)) ?>" target="_blank" rel="noopener noreferrer">LinkedIn</a>
+        <button class="btn btn-line btn-sm" type="button" data-copy>Copiar link</button>
+        <button class="btn btn-line btn-sm" type="button" data-native hidden>Mais opções</button>
+      </div>
+    </div>
+    <?php endif; ?>
     <aside class="art-cta">
       <div><b>Quer ajuda com isso no seu condomínio?</b><span>Converse com o Junior. A primeira conversa é sem custo.</span></div>
       <a class="btn btn-sun" href="<?= e(url('')) ?>#contato">Pedir proposta</a>
@@ -76,17 +90,16 @@ if ($art) {
     </aside>
   </article>
   <?php if ($outros): ?>
-  <section class="wrap art-more" aria-label="Outros artigos">
+  <section class="wrap art-more" aria-label="Artigos relacionados">
     <span class="eyebrow">Continue lendo</span>
     <div class="posts">
-      <?php foreach ($outros as $p): ?>
-      <a class="post" href="<?= e(url('guia/' . $p['slug'])) ?>"><span class="meta"><?= e(mb_strtoupper($p['categoria'])) ?> · <?= (int) $p['minutos'] ?> MIN</span><span class="pt"><?= e($p['titulo']) ?></span><span class="more">Ler artigo</span></a>
-      <?php endforeach; ?>
+      <?php foreach ($outros as $p) { echo post_card($p, false); } ?>
     </div>
   </section>
   <?php endif; ?>
 </main>
 <?php layout_footer(false); ?>
+<script src="<?= e(asset('assets/js/guia.js')) ?>" defer></script>
 </body>
 </html>
 <?php
@@ -94,12 +107,20 @@ if ($art) {
 }
 
 /* ---------- lista ---------- */
-$todos = artigos_publicados();
+$cats = artigos_categorias();
+$cat = (string) ($_GET['categoria'] ?? '');
+$cat = in_array($cat, $cats, true) ? $cat : '';
+$total = artigos_total($cat);
+$paginas = max(1, (int) ceil($total / JC_POR_PAGINA));
+$pag = min($paginas, max(1, (int) ($_GET['pagina'] ?? 1)));
+$todos = artigos_publicados(JC_POR_PAGINA, ($pag - 1) * JC_POR_PAGINA, $cat);
+$qs = fn(?string $c, int $n) => 'guia' . (($c || $n > 1) ? '?' . http_build_query(array_filter(['categoria' => $c, 'pagina' => $n > 1 ? $n : null])) : '');
+
 header('Cache-Control: public, max-age=600');
 layout_head([
-    'title' => 'Guia do condomínio: artigos para síndicos e conselheiros | JC Síndico',
+    'title' => ($cat ? mb_convert_case(mb_strtolower($cat), MB_CASE_TITLE) . ': artigos' : 'Guia do condomínio: artigos para síndicos e conselheiros') . ($pag > 1 ? ' (página ' . $pag . ')' : '') . ' | JC Síndico',
     'desc' => 'Textos curtos sobre as dúvidas que aparecem nas assembleias: eleição de síndico, fundo de reserva, manutenção e prestação de contas.',
-    'path' => 'guia',
+    'path' => $qs($cat ?: null, $pag),
 ]);
 ?>
 <body class="sub">
@@ -110,12 +131,25 @@ layout_head([
     <span class="eyebrow">Guia do condomínio</span>
     <h1 class="list-h">Artigos para síndicos e conselheiros</h1>
     <p class="art-lead">Textos curtos sobre as dúvidas que aparecem nas assembleias, escritos pelo Junior.</p>
+    <?php if (count($cats) > 1): ?>
+    <nav class="chips" aria-label="Filtrar por assunto">
+      <a href="<?= e(url('guia')) ?>"<?= $cat === '' ? ' aria-current="true"' : '' ?>>Todos</a>
+      <?php foreach ($cats as $c): ?>
+      <a href="<?= e(url($qs($c, 1))) ?>"<?= $cat === $c ? ' aria-current="true"' : '' ?>><?= e(mb_convert_case(mb_strtolower($c), MB_CASE_TITLE)) ?></a>
+      <?php endforeach; ?>
+    </nav>
+    <?php endif; ?>
     <?php if ($todos): ?>
     <div class="posts posts-all">
-      <?php foreach ($todos as $p): ?>
-      <a class="post" href="<?= e(url('guia/' . $p['slug'])) ?>"><span class="meta"><?= e(mb_strtoupper($p['categoria'])) ?> · <?= (int) $p['minutos'] ?> MIN</span><span class="pt"><?= e($p['titulo']) ?></span><p><?= e($p['resumo']) ?></p><span class="more">Ler artigo</span></a>
-      <?php endforeach; ?>
+      <?php foreach ($todos as $p) { echo post_card($p); } ?>
     </div>
+    <?php if ($paginas > 1): ?>
+    <nav class="pager" aria-label="Páginas">
+      <?php if ($pag > 1): ?><a href="<?= e(url($qs($cat ?: null, $pag - 1))) ?>" rel="prev">← Anteriores</a><?php endif; ?>
+      <span>Página <?= $pag ?> de <?= $paginas ?></span>
+      <?php if ($pag < $paginas): ?><a href="<?= e(url($qs($cat ?: null, $pag + 1))) ?>" rel="next">Mais artigos →</a><?php endif; ?>
+    </nav>
+    <?php endif; ?>
     <?php else: ?>
     <p>Nenhum artigo publicado ainda.</p>
     <?php endif; ?>

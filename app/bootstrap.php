@@ -85,3 +85,4 @@ set_exception_handler(function (Throwable $e) use ($debug) {
 require JC_APP . '/db.php';
 require JC_APP . '/helpers.php';
 require JC_APP . '/content.php';
+require JC_APP . '/log.php';

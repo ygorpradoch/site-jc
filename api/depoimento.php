@@ -25,6 +25,7 @@ db_q(
     [$texto, $nome, $papel ?: null, $cond ?: null]
 );
 
+log_evento('depoimento_enviado', 'Aguardando aprovação');
 notify('Novo depoimento para aprovar: ' . $nome, ['Nome' => $nome, 'Condomínio' => $cond ?: '-', 'Texto' => $texto]);
 
 json_out(['ok' => true]);

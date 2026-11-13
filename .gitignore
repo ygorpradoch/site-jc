@@ -21,3 +21,5 @@ desktop.ini
 .idea/
 node_modules/
 _teste*.html
+# sessões do painel (em disco, fora do Git)
+app/sessions/

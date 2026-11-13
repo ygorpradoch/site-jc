@@ -43,6 +43,7 @@ try {
     $leadId = (int) $pdo->lastInsertId();
     db_q('INSERT INTO agendamentos (lead_id, data, hora, modo) VALUES (?, ?, ?, ?)', [$leadId, $data, $hora . ':00', $modo]);
     $pdo->commit();
+    log_evento('agenda_pedida', 'Contato #' . $leadId . ' · ' . $quando);
 } catch (PDOException $e) {
     $pdo->rollBack();
     if ((string) $e->getCode() === '23000') { // outra pessoa pegou o horário no mesmo instante

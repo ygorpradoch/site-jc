@@ -143,3 +143,18 @@ function jsonld_negocio(): array
         'openingHours' => ['Mo-Fr 08:00-18:00', 'Sa 08:00-12:00'],
     ];
 }
+
+/** Cartão de artigo (home, lista do guia e "continue lendo"). Capa enviada pelo painel, ou um bloco da marca. */
+function post_card(array $p, bool $resumo = true): string
+{
+    $capa = capa_url($p['capa'] ?? null);
+    $cat = mb_strtoupper((string) $p['categoria']);
+    $img = $capa
+        ? '<span class="pcover"><img src="' . e($capa) . '" alt="" width="1200" height="630" loading="lazy" decoding="async"></span>'
+        : '<span class="pcover ph" aria-hidden="true"><i>' . e($cat) . '</i></span>';
+    return '<a class="post" href="' . e(url('guia/' . $p['slug'])) . '">' . $img
+        . '<span class="meta">' . e($cat) . ' · ' . (int) $p['minutos'] . ' MIN</span>'
+        . '<span class="pt">' . e($p['titulo']) . '</span>'
+        . ($resumo && $p['resumo'] !== '' ? '<p>' . e($p['resumo']) . '</p>' : '')
+        . '<span class="more">Ler artigo</span></a>';
+}

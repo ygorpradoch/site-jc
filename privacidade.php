@@ -28,7 +28,7 @@ $email = setting('email_contato');
         <li><strong>Agendamento de conversa:</strong> nome, WhatsApp, dia, horário e formato escolhidos. Usamos para confirmar e realizar a conversa.</li>
         <li><strong>Diagnóstico gratuito:</strong> as respostas são guardadas sem nome nem telefone, só para estatística. Se você decidir enviar o resultado, ele segue junto com o seu pedido de proposta ou pela conversa no WhatsApp.</li>
         <li><strong>Depoimentos:</strong> texto, nome, papel e condomínio que você informar, publicados apenas com a sua autorização.</li>
-        <li><strong>Segurança:</strong> para evitar envios automáticos e abuso, registramos uma versão cifrada (hash) do endereço IP. O IP em si não é armazenado.</li>
+        <li><strong>Segurança e registros de acesso:</strong> junto de cada contato guardamos apenas uma versão cifrada (hash) do endereço IP, para evitar envios automáticos e abuso. Além disso, mantemos um registro de atividade com data, hora, <strong>endereço IP</strong> e tipo de navegador dos envios feitos pelo site e das tentativas de acesso à área administrativa, por <strong>180 dias</strong>, para investigar abusos e cumprir a guarda de registros de acesso prevista no Marco Civil da Internet (art. 15).</li>
       </ul>
 
       <h2>Base legal</h2>

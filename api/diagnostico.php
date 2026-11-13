@@ -33,4 +33,7 @@ foreach (array_values($r) as $v) {
 }
 db_q('INSERT INTO diagnosticos (respostas, em_dia, pendentes) VALUES (?, ?, ?)', [implode(',', $norm), $ok, $pend]);
 
-json_out(['ok' => true, 'id' => (int) db()->lastInsertId()]);
+$diagId = (int) db()->lastInsertId();
+log_evento('diagnostico_feito', 'Diagnóstico #' . $diagId . ' · ' . $ok . ' em dia, ' . $pend . ' pendentes');
+
+json_out(['ok' => true, 'id' => $diagId]);
