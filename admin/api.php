@@ -278,17 +278,10 @@ case 'condo_salvar':
         $img = upload_imagem($_FILES['foto']);
         if (is_string($img)) { log_evento('upload_recusado', 'Foto de condomínio: ' . $img); json_fail($img); }
         $novaFoto = imagem_salvar(imagem_recorte($img, 920, 832), 'condominios');
-        $novaLinha = null;
-        if (!empty($_FILES['linha']) && ($_FILES['linha']['error'] ?? UPLOAD_ERR_NO_FILE) === UPLOAD_ERR_OK) {
-            $ln = upload_imagem($_FILES['linha']);
-            if (!is_string($ln)) {
-                $novaLinha = imagem_salvar(imagem_recorte($ln, 460, 416, true), 'condominios', true);
-            }
-        }
         imagem_apagar($foto);
         imagem_apagar($linha);
         $foto = $novaFoto;
-        $linha = $novaLinha;
+        $linha = null;
     } elseif (!empty($_POST['remover_foto'])) {
         imagem_apagar($foto);
         imagem_apagar($linha);

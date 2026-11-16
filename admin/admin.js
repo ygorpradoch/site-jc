@@ -208,23 +208,10 @@ VIEWS.agenda=function(){
 };
 
 /* ================= condomínios ================= */
-/* Recorta a foto no navegador (envio leve) e gera o desenho em linha, no mesmo estilo das fotos atuais. */
+/* Recorta a foto no navegador (envio leve). */
 function loadImage(file){return new Promise(function(ok,fail){var u=URL.createObjectURL(file),i=new Image();i.onload=function(){ok(i)};i.onerror=function(){URL.revokeObjectURL(u);fail()};i.src=u})}
 function cover(img,w,hh){var c=document.createElement('canvas');c.width=w;c.height=hh;var x=c.getContext('2d'),r=w/hh,sw=img.naturalWidth,sh=img.naturalHeight,cw,ch;
   if(sw/sh>r){ch=sh;cw=sh*r}else{cw=sw;ch=sw/r}x.imageSmoothingQuality='high';x.drawImage(img,(sw-cw)/2,(sh-ch)/2,cw,ch,0,0,w,hh);return c}
-function lineArt(img){
-  var W=460,H=416,c=cover(img,W,H),x=c.getContext('2d'),d=x.getImageData(0,0,W,H),p=d.data,g=new Float32Array(W*H),b=new Float32Array(W*H),m=new Float32Array(W*H),i,y,xx;
-  for(i=0;i<W*H;i++)g[i]=.299*p[i*4]+.587*p[i*4+1]+.114*p[i*4+2];
-  for(y=1;y<H-1;y++)for(xx=1;xx<W-1;xx++){i=y*W+xx;b[i]=(g[i-W-1]+2*g[i-W]+g[i-W+1]+2*g[i-1]+4*g[i]+2*g[i+1]+g[i+W-1]+2*g[i+W]+g[i+W+1])/16}
-  var hist=[];
-  for(y=2;y<H-2;y++)for(xx=2;xx<W-2;xx++){i=y*W+xx;
-    var gx=-b[i-W-1]-2*b[i-1]-b[i+W-1]+b[i-W+1]+2*b[i+1]+b[i+W+1],gy=-b[i-W-1]-2*b[i-W]-b[i-W+1]+b[i+W-1]+2*b[i+W]+b[i+W+1];
-    m[i]=Math.sqrt(gx*gx+gy*gy);if((i&7)===0)hist.push(m[i])}
-  hist.sort(function(a,z){return a-z});
-  var lo=hist[Math.floor(hist.length*.82)]||20,hi=hist[Math.floor(hist.length*.97)]||80;if(hi<=lo)hi=lo+1;
-  for(i=0;i<W*H;i++){var a=Math.max(0,Math.min(1,(m[i]-lo)/(hi-lo)));p[i*4]=171;p[i*4+1]=209;p[i*4+2]=255;p[i*4+3]=Math.round(a*255)}
-  x.putImageData(d,0,0);return c;
-}
 function toBlob(c,type,q){return new Promise(function(ok){c.toBlob(ok,type,q)})}
 
 VIEWS.condos=function(edit){
@@ -242,24 +229,24 @@ VIEWS.condos=function(edit){
     });
     var c=edit||{},nome=h('input',{required:true,maxLength:120,placeholder:'Ex.: Residencial Sol',value:c.nome||''}),bairro=h('input',{maxLength:80,placeholder:'Ex.: Aldeota',value:c.bairro||''}),
       un=h('input',{type:'number',min:1,max:5000,required:true,placeholder:'48',value:c.unidades||''}),desde=h('input',{type:'month',required:true,value:c.desde?c.desde.slice(0,7):new Date().toISOString().slice(0,7)}),
-      foto=h('input',{type:'file',accept:'image/jpeg,image/png,image/webp'}),prev=h('div.cprev'),fBlob=null,lBlob=null;
+      foto=h('input',{type:'file',accept:'image/jpeg,image/png,image/webp'}),prev=h('div.cprev'),fBlob=null;
     if(c.foto)prev.appendChild(h('img',{src:SITE+c.foto,alt:'Foto atual'}));
-    foto.addEventListener('change',function(){fBlob=lBlob=null;prev.textContent='';var f=foto.files[0];if(!f)return;
+    foto.addEventListener('change',function(){fBlob=null;prev.textContent='';var f=foto.files[0];if(!f)return;
       if(['image/jpeg','image/png','image/webp'].indexOf(f.type)<0){toast('Envie a foto em JPG, PNG ou WEBP',true);foto.value='';return}
       if(f.size>25*1024*1024){toast('Arquivo muito grande',true);foto.value='';return}
-      prev.appendChild(h('p.muted','Preparando a foto e o desenho…'));
+      prev.appendChild(h('p.muted','Preparando a foto…'));
       loadImage(f).then(function(img){
         if(img.naturalWidth<400||img.naturalHeight<360){toast('A foto é pequena demais (mínimo 400 px de largura).',true);foto.value='';prev.textContent='';return}
-        var pc=cover(img,920,832),lc=lineArt(img);
-        return Promise.all([toBlob(pc,'image/jpeg',.88),toBlob(lc,'image/png')]).then(function(bs){fBlob=bs[0];lBlob=bs[1];prev.textContent='';
-          var a=h('img',{alt:'Foto recortada'});a.src=URL.createObjectURL(fBlob);var b=h('img.ln',{alt:'Desenho em linha'});b.src=URL.createObjectURL(lBlob);
-          prev.appendChild(a);prev.appendChild(b);prev.appendChild(h('small.muted','Recorte e desenho que vão para o site.'))});
+        var pc=cover(img,920,832);
+        return toBlob(pc,'image/jpeg',.88).then(function(bl){fBlob=bl;prev.textContent='';
+          var a=h('img',{alt:'Foto recortada'});a.src=URL.createObjectURL(fBlob);
+          prev.appendChild(a);prev.appendChild(h('small.muted','Recorte que vai para o site.'))});
       }).catch(function(){toast('Não foi possível ler a imagem.',true)});
     });
     var form=h('form.panel.condo-form',{onsubmit:function(e){e.preventDefault();
         var fd=new FormData();if(c.id)fd.append('id',c.id);fd.append('nome',nome.value);fd.append('bairro',bairro.value);fd.append('unidades',un.value);fd.append('desde',desde.value);
         if(foto.files[0]&&!fBlob){toast('Aguarde a foto terminar de processar.',true);return}
-        if(fBlob){fd.append('foto',fBlob,'foto.jpg');fd.append('linha',lBlob,'linha.png')}
+        if(fBlob)fd.append('foto',fBlob,'foto.jpg');
         var btn=form.querySelector('[type=submit]');btn.disabled=true;
         api('condo_salvar',fd,true).then(function(x){btn.disabled=false;if(x.ok){toast(c.id?'Condomínio atualizado':'Adicionado. Já aparece no site.');VIEWS.condos()}})}},
       h('h3',c.id?'Editar '+c.nome:'Adicionar condomínio',c.id?h('button',{type:'button',onclick:function(){VIEWS.condos()}},'Cancelar edição'):null),

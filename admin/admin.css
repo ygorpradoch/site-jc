@@ -33,7 +33,6 @@ td.acts-cell .btn+.btn{margin-left:6px}
 .detail .field{gap:4px}
 .cprev{display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end}
 .cprev img{width:200px;height:auto;border-radius:6px;border:1px solid var(--line);background:#0A1E3F}
-.cprev img.ln{background:#0A1E3F}
 .condo-form{margin-top:18px}
 .bl-form{grid-template-columns:1fr 1fr 1.4fr auto}
 .share{display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:14px 18px;margin-top:18px}

@@ -1,13 +1,13 @@
 -- Conteúdo inicial (importar depois de schema.sql). Pode ser editado depois pelo painel.
 SET NAMES utf8mb4;
 
-INSERT INTO condominios (nome, bairro, unidades, desde, foto, foto_linha, exibir) VALUES
-('Cond. Praia Nova',        NULL, 92, '2014-06-01', 'assets/img/condominios/praia-nova.webp', 'assets/img/condominios/praia-nova-linha.webp', 1),
-('Cond. Marambaia',         NULL, 92, '2021-06-01', 'assets/img/condominios/marambaia.webp',  'assets/img/condominios/marambaia-linha.webp',  1),
-('Dom Condomínio Parque',   NULL, 88, '2022-05-01', 'assets/img/condominios/dom-parque.webp', 'assets/img/condominios/dom-parque-linha.webp', 1),
-('Giardino di Fazano',      NULL, 30, '2024-06-01', 'assets/img/condominios/giardino.webp',   'assets/img/condominios/giardino-linha.webp',   1),
-('Cond. Abelardo Pompeu',   NULL, 20, '2024-08-01', 'assets/img/condominios/abelardo.webp',   'assets/img/condominios/abelardo-linha.webp',   1),
-('Ed. Pacific Hills',       NULL, 57, '2025-01-01', NULL, NULL, 1);
+INSERT INTO condominios (nome, bairro, unidades, desde, foto, exibir) VALUES
+('Cond. Praia Nova',        NULL, 92, '2014-06-01', 'assets/img/condominios/praia-nova.webp', 1),
+('Cond. Marambaia',         NULL, 92, '2021-06-01', 'assets/img/condominios/marambaia.webp',  1),
+('Dom Condomínio Parque',   NULL, 88, '2022-05-01', 'assets/img/condominios/dom-parque.webp', 1),
+('Giardino di Fazano',      NULL, 30, '2024-06-01', 'assets/img/condominios/giardino.webp',   1),
+('Cond. Abelardo Pompeu',   NULL, 20, '2024-08-01', 'assets/img/condominios/abelardo.webp',   1),
+('Ed. Pacific Hills',       NULL, 57, '2025-01-01', NULL, 1);
 
 INSERT INTO artigos (slug, titulo, categoria, minutos, resumo, corpo, status, publicado_em) VALUES
 ('como-contratar-sindico-profissional',

@@ -180,9 +180,6 @@ function boot(){
     };
     var cRaf=0,cQueue=function(){if(!cRaf)cRaf=requestAnimationFrame(function(){cRaf=0;checkCondos()})};
     if(!reduced())cSec.classList.add('js-anim');
-    cItems().forEach(function(c){
-      var pic=c.querySelector('.pic');if(pic&&pic.querySelector('.line')){pic.setAttribute('role','button');pic.setAttribute('tabindex','0');pic.setAttribute('aria-label','Alternar entre foto e desenho técnico de '+c.querySelector('h3').textContent);
-        var tog=function(){c.classList.toggle('plan')};pic.addEventListener('click',function(){if(!cx.__dragged)tog()});pic.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();tog()}})}});
     window.addEventListener('scroll',cQueue,{passive:true});window.addEventListener('resize',cQueue);cx.addEventListener('scroll',cQueue,{passive:true});
     cx.addEventListener('scroll',cUpdate,{passive:true});
     ['pointerdown','keydown','touchstart'].forEach(function(t){cx.addEventListener(t,userTook,{passive:true})});
@@ -296,14 +293,12 @@ function boot(){
       else if(c.nodeType===1)walk(c)})})(elm)}
   function setupReveal(){
     if(!('IntersectionObserver' in window))return;
-    $$('main .h2').forEach(splitWords);
     var groups=['main .block .head','.steps li','.quote','.portrait','.about-text','.timeline li','.compare tr','.post','.faq details','.formcard','.cinfo'];
     groups.forEach(function(sel){$$(sel).forEach(function(e,i){e.classList.add('reveal');e.style.setProperty('--d',Math.min(i,6))})});
     var io=new IntersectionObserver(function(es){es.forEach(function(en){
       if(!en.isIntersecting)return;var t=en.target;io.unobserve(t);t.classList.add('in');
     })},{threshold:.15,rootMargin:'0px 0px -6% 0px'});
     $$('.reveal').forEach(function(e){io.observe(e)});
-    $$('main .h2').forEach(function(e){io.observe(e)});
   }
 
   /* ---------- GSAP: Junior em cena, cartões empilhados ---------- */
@@ -325,16 +320,16 @@ function boot(){
       gsap.set('#dial',{xPercent:-50,yPercent:-50,x:0,y:0});
       gsap.set('.sh-copy',{yPercent:mobile?0:-30,y:0});
       gsap.timeline({defaults:{ease:'expo.out'}})
-        .from('.sh-bg',{opacity:0,duration:1.6,ease:'power2.out'})
-        .from('.sh-dial',{scale:.6,rotate:-60,opacity:0,duration:1.8,transformOrigin:'50% 50%'},.1)
-        .from('.sh-back',{yPercent:40,opacity:0,duration:1.4},.1)
-        .from('.sh-photo2',{y:160,opacity:0,duration:1.6},.15)
-        .from('.sh-photo',{y:140,duration:1.5},.05)
-        .from('.sh-front',{yPercent:90,opacity:0,duration:1.3},.55)
-        .from('.sh-chips li',{y:30,opacity:0,scale:.9,stagger:.12,duration:1},.8)
-        .from('.sh-copy > *',{y:24,stagger:.06,duration:.9},.1);
+        .from('.sh-bg',{opacity:0,duration:.9,ease:'power2.out'})
+        .from('.sh-dial',{scale:.9,opacity:0,duration:1,transformOrigin:'50% 50%'},.1)
+        .from('.sh-back',{yPercent:20,opacity:0,duration:.9},.1)
+        .from('.sh-photo2',{y:80,opacity:0,duration:1},.15)
+        .from('.sh-photo',{y:70,duration:.9},.05)
+        .from('.sh-front',{yPercent:50,opacity:0,duration:.8},.35)
+        .from('.sh-chips li',{y:16,opacity:0,stagger:.08,duration:.6},.5)
+        .from('.sh-copy > *',{y:16,stagger:.05,duration:.6},.1);
       /* desktop: abertura presa enquanto a cena anima; celular: rola normalmente, só com movimento leve */
-      var heroTl=gsap.timeline({scrollTrigger:mobile?{trigger:'.sh',start:'top top',end:'bottom top',scrub:.5}:{trigger:'.sh',start:'top top',end:'+=90%',scrub:.7,pin:true}})
+      var heroTl=gsap.timeline({scrollTrigger:mobile?{trigger:'.sh',start:'top top',end:'bottom top',scrub:.5}:{trigger:'.sh',start:'top top',end:'+=60%',scrub:.7,pin:true}})
         .to('.sh-back',{xPercent:-38,ease:'none'},0)
         .to('.sh-front',{xPercent:mobile?-95:-60,ease:'none'},0)
         .to('#dial',{rotate:120,ease:'none'},0)
@@ -350,11 +345,9 @@ function boot(){
       var cards=gsap.utils.toArray('.scard');
       cards.forEach(function(c,i){
         var tl=gsap.timeline({scrollTrigger:{trigger:c,start:'top 80%'}});
-        tl.fromTo(c.querySelectorAll('.ico [pathLength]'),{strokeDasharray:1,strokeDashoffset:1},{strokeDashoffset:0,duration:1.1,stagger:.18,ease:'power2.inOut'},0)
-          .from(c.querySelector('.led'),{y:-10,opacity:0,duration:.5,ease:'back.out(2)'},.2)
-          .from(c.querySelector('.led b'),{textContent:0,duration:.8,snap:{textContent:1},ease:'power1.out'},.3)
-          .from(c.querySelectorAll('h3,.k,:scope > p'),{y:40,opacity:0,stagger:.06,duration:.8,ease:'expo.out'},.1)
-          .from(c.querySelectorAll('li'),{x:-24,opacity:0,stagger:.09,duration:.6,ease:'power3.out'},.45);
+        tl.fromTo(c.querySelectorAll('.ico [pathLength]'),{strokeDasharray:1,strokeDashoffset:1},{strokeDashoffset:0,duration:.8,stagger:.12,ease:'power2.inOut'},0)
+          .from(c.querySelector('.led'),{opacity:0,duration:.4},.1)
+          .from(c.querySelectorAll('h3,.k,:scope > p,li'),{y:18,opacity:0,stagger:.04,duration:.5,ease:'power2.out'},.1);
         if(i===cards.length-1)return;
         var st={trigger:cards[i+1],start:'top bottom',end:'top '+(84+(i+1)*16)+'px',scrub:true};
         gsap.to(c,{scale:mobile?.9:.93,ease:'none',scrollTrigger:st});

@@ -156,11 +156,9 @@ layout_head([
             <div class="pic">
               <?php if ($c['foto']): ?>
               <img class="photo" loading="lazy" src="<?= e(url($c['foto'])) ?>" alt="Fachada do <?= e($c['nome']) ?>, condomínio administrado por Junior Chagas em Fortaleza" width="460" height="416">
-              <?php if ($c['foto_linha']): ?><img class="line" loading="lazy" src="<?= e(url($c['foto_linha'])) ?>" alt="" aria-hidden="true"><?php endif; ?>
               <?php else: ?>
               <span class="nofoto">FOTO EM BREVE</span>
               <?php endif; ?>
-              <div class="pen"></div>
               <svg viewBox="0 0 460 416" preserveAspectRatio="none" aria-hidden="true">
                 <line class="dl" pathLength="1" x1="440" y1="24" x2="440" y2="392"/><line class="dl" pathLength="1" x1="432" y1="24" x2="448" y2="24"/>
                 <line class="dl" pathLength="1" x1="432" y1="392" x2="448" y2="392"/><line class="dl" pathLength="1" x1="20" y1="404" x2="300" y2="404"/>
