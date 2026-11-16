@@ -155,3 +155,17 @@ dialog.reauth h3{font:800 20px var(--f-display)}
 dialog.reauth p{margin:0;font-size:14px}
 
 body[data-perfil="gestor"] .so-master{display:none!important}
+
+/* escolha da primeira tela (Configurações) */
+.hero-opts{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;margin:14px 0}
+.hero-opt{display:grid;grid-template-columns:auto 1fr;gap:6px 12px;align-items:start;padding:12px;border:1px solid var(--line);border-radius:10px;cursor:pointer;background:var(--surface)}
+.hero-opt:has(input:checked){border-color:var(--petrol);box-shadow:0 0 0 2px var(--petrol)}
+.hero-opt:has(input:focus-visible){outline:3px solid var(--sun);outline-offset:2px}
+.hero-opt input{margin-top:3px}
+.hero-opt .mini{grid-column:1 / -1;order:-1;height:74px;border-radius:6px;position:relative;overflow:hidden}
+.hero-opt .mini.escura{background:radial-gradient(60% 80% at 70% 30%,#1c4a92,transparent 70%),#0A1E3F}
+.hero-opt .mini.clara{background:linear-gradient(#F0F5F7 60%,#3C69AD 60%,#14346A)}
+.hero-opt .mini::after{content:"";position:absolute;right:16%;bottom:0;width:34px;height:46px;border-radius:14px 14px 0 0;background:#0B1F3F;box-shadow:24px 6px 0 -2px #111}
+.hero-opt .mini.escura::after{background:#355fa8;box-shadow:24px 6px 0 -2px #222}
+.hero-opt .t{display:grid;gap:3px}
+.hero-opt .t small{color:var(--ink-soft);font-size:12.5px;line-height:1.35}

@@ -432,8 +432,14 @@ case 'config_salvar':
     foreach (['instagram', 'linkedin'] as $u) {
         if (!empty($in[$u]) && !preg_match('#^https://#i', (string) $in[$u])) json_fail('Os links das redes devem começar com https://');
     }
+    if (array_key_exists('hero_estilo', $in)) {
+        $estilo = (string) $in['hero_estilo'];
+        if (!in_array($estilo, ['escura', 'clara'], true)) json_fail('Escolha a primeira tela escura ou clara.');
+        db_q('REPLACE INTO configuracoes (chave, valor) VALUES (?, ?)', ['hero_estilo', $estilo]);
+        $campos['hero_estilo'] = 20; // só para entrar no registro abaixo
+    }
     foreach ($campos as $k => $max) {
-        if (array_key_exists($k, $in)) {
+        if ($k !== 'hero_estilo' && array_key_exists($k, $in)) {
             $v = clean_line($in[$k], $max);
             if ($k === 'whatsapp') {
                 $v = fmt_phone((string) clean_phone($v));

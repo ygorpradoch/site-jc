@@ -1082,7 +1082,7 @@ a.post{text-decoration:none;color:inherit}
 /* celular: o WhatsApp redondo só aparece depois da abertura, para não cobrir os botões dela */
 @media (max-width:640px){
   .wa-float{transition:opacity .3s ease,transform .3s ease}
-  body:has(.sh):not(.past-hero) .wa-float{opacity:0;transform:scale(.6);pointer-events:none}
+  body:has(.sh,.hc):not(.past-hero) .wa-float{opacity:0;transform:scale(.6);pointer-events:none}
 }
 
 /* ---------- blog: capa, mídia dentro do artigo, filtro, paginação, compartilhar ---------- */

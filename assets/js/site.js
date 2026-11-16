@@ -21,7 +21,7 @@ function boot(){
   }
 
   var top=$('#topbar'),burger=$('#burger');
-  var hero=$('.sh');
+  var hero=$('.sh')||$('.hc');
   function onScroll(){var y=window.scrollY;top.classList.toggle('scrolled',y>8);if(hero)body.classList.toggle('past-hero',y>hero.offsetHeight*.6)}
   window.addEventListener('scroll',onScroll,{passive:true});onScroll();
 
@@ -317,6 +317,7 @@ function boot(){
     var mm=gsap.matchMedia();
     mm.add({mobile:'(max-width: 899px)',desktop:'(min-width: 900px)'},function(ctx){
       var mobile=ctx.conditions.mobile;
+      if($('.sh')){ /* hero escuro; o hero claro tem o próprio script (hero-clara.js) */
       gsap.set('#dial',{xPercent:-50,yPercent:-50,x:0,y:0});
       gsap.set('.sh-copy',{yPercent:mobile?0:-30,y:0});
       gsap.timeline({defaults:{ease:'expo.out'}})
@@ -340,6 +341,7 @@ function boot(){
         .to('.sh-chips li:nth-child(3)',{y:-60,ease:'none'},0)
         .to('.sh-copy',{opacity:0,y:-30,ease:'none'},.5)
         .to('.sh-chips',{opacity:0,ease:'none'},.7);
+      }
       gsap.fromTo('.svc-marquee span',{xPercent:0},{xPercent:-50,ease:'none',scrollTrigger:{trigger:'.svc-sec',start:'top bottom',end:'bottom top',scrub:.6}});
       var cards=gsap.utils.toArray('.scard');
       cards.forEach(function(c,i){
