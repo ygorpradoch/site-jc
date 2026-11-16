@@ -105,6 +105,23 @@ function capa_url(?string $capa): ?string
     return midia_valida($capa, ['webp', 'jpg', 'png']) ? url($capa) : null;
 }
 
+/**
+ * Capa genérica por categoria, para artigo sem capa própria: assets/img/capas/<categoria>.webp
+ * (manutencao, financas, eleicao...) ou assets/img/capas/padrao.webp. Sem os arquivos, o cartão mostra o degradê.
+ */
+function capa_padrao(string $categoria): ?string
+{
+    $k = strtr(mb_strtolower(trim($categoria)), ['á' => 'a', 'à' => 'a', 'â' => 'a', 'ã' => 'a', 'é' => 'e', 'ê' => 'e', 'í' => 'i', 'ó' => 'o', 'ô' => 'o', 'õ' => 'o', 'ú' => 'u', 'ç' => 'c']);
+    $k = trim((string) preg_replace('/[^a-z0-9]+/', '-', $k), '-');
+    foreach ([$k, 'padrao'] as $n) {
+        $rel = 'assets/img/capas/' . $n . '.webp';
+        if ($n !== '' && is_file(JC_ROOT . '/' . $rel)) {
+            return $rel;
+        }
+    }
+    return null;
+}
+
 /** Arquivos citados no corpo do artigo ([[foto:...]] e [[video:...]]). */
 function artigo_midias(string $corpo): array
 {

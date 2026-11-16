@@ -33,9 +33,10 @@ if ($previa !== null) {
 if ($art) {
     $outros = artigos_relacionados((int) ($art['id'] ?? 0), (string) $art['categoria'], 3);
     header('Cache-Control: ' . ($previa === null ? 'public, max-age=600' : 'no-store'));
-    $capa = capa_url($art['capa'] ?? null);
+    $capaPadrao = capa_padrao((string) $art['categoria']);
+    $capa = capa_url($art['capa'] ?? null) ?? ($capaPadrao ? url($capaPadrao) : null);
     $linkArt = abs_url('guia/' . $art['slug']);
-    $imgSocial = $capa ? $art['capa'] : 'assets/img/og.jpg';
+    $imgSocial = capa_url($art['capa'] ?? null) ? $art['capa'] : ($capaPadrao ?: 'assets/img/og.jpg');
     layout_head([
         'title' => $art['titulo'] . ' | Guia do condomínio · JC Síndico',
         'desc' => $art['resumo'],

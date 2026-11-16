@@ -147,7 +147,7 @@ function jsonld_negocio(): array
 /** Cartão de artigo (home, lista do guia e "continue lendo"). Capa enviada pelo painel, ou um bloco da marca. */
 function post_card(array $p, bool $resumo = true): string
 {
-    $capa = capa_url($p['capa'] ?? null);
+    $capa = capa_url($p['capa'] ?? null) ?? (($pd = capa_padrao((string) $p['categoria'])) ? url($pd) : null);
     $cat = mb_strtoupper((string) $p['categoria']);
     $img = $capa
         ? '<span class="pcover"><img src="' . e($capa) . '" alt="" width="1200" height="630" loading="lazy" decoding="async"></span>'
