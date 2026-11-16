@@ -1,6 +1,6 @@
 <?php
 /**
- * Guia do condomínio (blog do Junior).
+ * Guia do condomínio (blog da JC Síndico Profissional).
  *   /guia                              → lista (filtro ?categoria=, paginação ?pagina=)
  *   /guia/<slug>                       → artigo (o .htaccess reescreve para guia.php?slug=...)
  * admin/previa.php inclui este arquivo com $JC_PREVIA definido para mostrar rascunhos.
@@ -51,12 +51,12 @@ if ($art) {
             'image' => [abs_url($imgSocial)],
             'datePublished' => $art['publicado_em'] ? date('c', strtotime($art['publicado_em'])) : null,
             'dateModified' => date('c', strtotime($art['atualizado_em'] ?? 'now')),
-            'author' => ['@type' => 'Person', 'name' => 'Junior Chagas'],
+            'author' => ['@type' => 'Organization', 'name' => 'JC Síndico Profissional'],
             'publisher' => ['@type' => 'Organization', 'name' => 'JC Síndico Profissional', 'logo' => ['@type' => 'ImageObject', 'url' => abs_url('assets/img/logo-v-azul.svg')]],
             'mainEntityOfPage' => $linkArt,
         ],
     ]);
-    $textoShare = $art['titulo'] . ' — Guia do condomínio, Junior Chagas';
+    $textoShare = $art['titulo'] . ' — Guia do condomínio, JC Síndico Profissional';
     ?>
 <body class="sub">
 <?php if ($previa !== null): ?><div class="preview-bar">PRÉ-VISUALIZAÇÃO · <?= $art['status'] === 'publicado' ? 'artigo publicado' : 'rascunho, ainda não aparece no site' ?></div><?php endif; ?>
@@ -67,7 +67,7 @@ if ($art) {
     <span class="eyebrow"><?= e(mb_strtoupper($art['categoria'])) ?> · <?= (int) $art['minutos'] ?> MIN DE LEITURA</span>
     <h1><?= e($art['titulo']) ?></h1>
     <?php if ($art['resumo']): ?><p class="art-lead"><?= e($art['resumo']) ?></p><?php endif; ?>
-    <div class="art-by"><img src="<?= e(url('assets/img/junior-foto.webp')) ?>" alt="" width="44" height="44"><span><b>Junior Chagas</b>Síndico profissional<?= $art['publicado_em'] ? ' · ' . e(fmt_data($art['publicado_em'])) : '' ?></span></div>
+    <div class="art-by"><img src="<?= e(url('favicon.svg')) ?>" alt="" width="44" height="44"><span><b>JC Síndico Profissional</b>Guia do condomínio<?= $art['publicado_em'] ? ' · ' . e(fmt_data($art['publicado_em'])) : '' ?></span></div>
     <?php if ($capa): ?><figure class="art-cover"><img src="<?= e($capa) ?>" alt="" width="1200" height="630" fetchpriority="high"></figure><?php endif; ?>
     <div class="art-body">
       <?= artigo_html((string) $art['corpo']) ?>
@@ -84,9 +84,9 @@ if ($art) {
     </div>
     <?php endif; ?>
     <aside class="art-cta">
-      <div><b>Quer ajuda com isso no seu condomínio?</b><span>Converse com o Junior. A primeira conversa é sem custo.</span></div>
+      <div><b>Quer ajuda com isso no seu condomínio?</b><span>Converse com a JC. A primeira conversa é sem custo.</span></div>
       <a class="btn btn-sun" href="<?= e(url('')) ?>#contato">Pedir proposta</a>
-      <a class="btn btn-line" href="<?= e(wa_link('Olá Junior, li o artigo "' . $art['titulo'] . '" no site e queria conversar.')) ?>" target="_blank" rel="noopener">WhatsApp</a>
+      <a class="btn btn-line" href="<?= e(wa_link('Olá, li o artigo "' . $art['titulo'] . '" no site e queria conversar.')) ?>" target="_blank" rel="noopener">WhatsApp</a>
     </aside>
   </article>
   <?php if ($outros): ?>
@@ -130,7 +130,7 @@ layout_head([
     <nav class="crumbs" aria-label="Você está em"><a href="<?= e(url('')) ?>">Início</a> / Guia</nav>
     <span class="eyebrow">Guia do condomínio</span>
     <h1 class="list-h">Artigos para síndicos e conselheiros</h1>
-    <p class="art-lead">Textos curtos sobre as dúvidas que aparecem nas assembleias, escritos pelo Junior.</p>
+    <p class="art-lead">Textos curtos sobre as dúvidas que aparecem nas assembleias, escritos pela equipe da JC.</p>
     <?php if (count($cats) > 1): ?>
     <nav class="chips" aria-label="Filtrar por assunto">
       <a href="<?= e(url('guia')) ?>"<?= $cat === '' ? ' aria-current="true"' : '' ?>>Todos</a>

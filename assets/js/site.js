@@ -99,7 +99,7 @@ function boot(){
     var diagMsg=function(ok){
       var pend=QX.filter(function(q,i){return ans[i]==='no'}).map(function(q){return q[1].replace(/\?$/,'')});
       var nsi=QX.filter(function(q,i){return ans[i]==='ns'}).length;
-      return 'Olá Junior, fiz o diagnóstico no site: '+ok+' de '+N+' itens em dia.'+(pend.length?' Pendentes: '+pend.join('; ')+'.':'')+(nsi?' Sem informação: '+nsi+'.':'');
+      return 'Olá, fiz o diagnóstico no site da JC: '+ok+' de '+N+' itens em dia.'+(pend.length?' Pendentes: '+pend.join('; ')+'.':'')+(nsi?' Sem informação: '+nsi+'.':'');
     };
     var saveDiag=function(){if(diagSent)return;diagSent=true;api('diagnostico.php',{respostas:ans}).then(function(r){if(r&&r.ok)diagId=r.id})};
     var viewResult=function(){
@@ -237,7 +237,7 @@ function boot(){
     var DAYS=[],selDay=0,selTime=null,agendaLoaded=false;
     var renderDays=function(){
       var d=$('#days'),s=$('#slots');d.textContent='';s.textContent='';
-      if(!DAYS.length){d.appendChild(el('span','slots-msg','Sem horários livres nos próximos dias. Chame no WhatsApp que eu encaixo você.'));return}
+      if(!DAYS.length){d.appendChild(el('span','slots-msg','Sem horários livres nos próximos dias. Chame no WhatsApp que a gente encaixa você.'));return}
       DAYS.forEach(function(x,i){var b=el('button');b.type='button';b.appendChild(el('small',null,x.dia));b.appendChild(document.createTextNode(x.rotulo));b.setAttribute('aria-pressed',String(i===selDay));b.addEventListener('click',function(){selDay=i;selTime=null;renderDays()});d.appendChild(b)});
       var day=DAYS[selDay];
       day.slots.forEach(function(t){var b=el('button',null,t.h);b.type='button';b.disabled=!t.livre;b.setAttribute('aria-pressed',String(t.h===selTime));if(!t.livre)b.setAttribute('aria-label',t.h+' ocupado');b.addEventListener('click',function(){selTime=t.h;renderDays()});s.appendChild(b)});

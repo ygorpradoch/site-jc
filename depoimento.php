@@ -1,14 +1,14 @@
 <?php
 /**
  * Página para clientes deixarem um depoimento. Não aparece no menu:
- * o Junior envia o link (/depoimento) para síndicos, conselheiros e moradores.
+ * a JC envia o link (/depoimento) para síndicos, conselheiros e moradores.
  * Nada é publicado sem aprovação no painel.
  */
 require __DIR__ . '/app/bootstrap.php';
 require JC_APP . '/layout.php';
 layout_head([
     'title' => 'Deixe seu depoimento | JC Síndico Profissional',
-    'desc' => 'Conte como é ter o Junior Chagas como síndico do seu condomínio.',
+    'desc' => 'Conte como é ter a JC Síndico Profissional na gestão do seu condomínio.',
     'path' => 'depoimento',
     'robots' => 'noindex, follow',
 ]);
@@ -18,7 +18,7 @@ layout_head([
 <main id="conteudo" class="art-page">
   <div class="wrap narrow">
     <span class="eyebrow">Depoimento</span>
-    <h1 class="list-h">Como é ter o Junior como síndico?</h1>
+    <h1 class="list-h">Como é ter a JC na gestão do seu condomínio?</h1>
     <p class="art-lead">Sua opinião ajuda outros condomínios a decidir. O texto só aparece no site depois de revisado, com o nome e o papel que você informar.</p>
     <form class="fgrid formcard depo-form" id="depo-form" novalidate>
       <div class="field full"><label for="d-texto">Seu depoimento</label><textarea id="d-texto" name="texto" maxlength="600" required placeholder="Ex.: a prestação de contas chega todo mês sem a gente precisar pedir."></textarea><small class="count" id="d-count">0 / 600</small></div>

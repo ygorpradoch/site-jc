@@ -10,13 +10,13 @@ $depos = depoimentos_site();
 $posts = artigos_publicados(3);
 $wa = setting('whatsapp');
 $waDigits = preg_replace('/\D+/', '', $wa);
-$waRef = wa_link('Olá Junior, gostaria de falar com o conselho de um condomínio que você administra.');
+$waRef = wa_link('Olá, gostaria de falar com o conselho de um condomínio atendido pela JC.');
 
 header('Cache-Control: public, max-age=300');
 
 layout_head([
-    'title' => 'Síndico profissional em Fortaleza | Junior Chagas · JC Síndico',
-    'desc' => "Junior Chagas é síndico profissional em Fortaleza desde 2014. Gestão financeira, manutenção, assembleias e visita semanal, com prestação de contas todo mês. {$nCond} condomínios, {$totUn} unidades.",
+    'title' => 'Síndico profissional em Fortaleza | JC Síndico Profissional',
+    'desc' => "A JC Síndico Profissional administra condomínios em Fortaleza desde 2014. Gestão financeira, manutenção, assembleias e visita semanal, com prestação de contas todo mês. {$nCond} condomínios, {$totUn} unidades.",
     'path' => '',
     'preload' => ['assets/img/junior-novo.webp'],
     'jsonld' => jsonld_negocio(),
@@ -69,15 +69,15 @@ layout_head([
       <li><b><?= $totUn ?></b>unidades</li>
     </ul>
     <div class="sh-copy">
-      <span class="eyebrow">Junior Chagas · desde <?= e(setting('inicio_ano')) ?></span>
+      <span class="eyebrow">JC Síndico Profissional · desde <?= e(setting('inicio_ano')) ?></span>
       <h1>Síndico profissional em Fortaleza, com contas abertas todo mês</h1>
-      <p>Sou <b>Junior Chagas</b>. Com minha equipe, cuido das finanças, da manutenção e das assembleias do seu condomínio, com visita toda semana e prestação de contas que qualquer morador entende.</p>
+      <p>Somos a <b>JC Síndico Profissional</b>. Nossa equipe cuida das finanças, da manutenção e das assembleias do seu condomínio, com visita toda semana e prestação de contas que qualquer morador entende.</p>
       <div class="btns"><a class="btn btn-sun" href="#contato" data-ride="contato">Pedir proposta</a><a class="btn btn-ghost" href="#diagnostico" data-ride="diagnostico">Diagnóstico grátis</a></div>
     </div>
   </section>
 
   <aside class="ref-band" aria-label="Referência de clientes">
-    <div class="wrap"><p><b>Quer falar com quem já me contratou?</b> Eu coloco você em contato com o conselho de um dos meus condomínios.</p><a href="<?= e($waRef) ?>" target="_blank" rel="noopener" class="ref-link">Pedir uma referência →</a></div>
+    <div class="wrap"><p><b>Quer falar com quem já contratou a JC?</b> Colocamos você em contato com o conselho de um dos nossos condomínios.</p><a href="<?= e($waRef) ?>" target="_blank" rel="noopener" class="ref-link">Pedir uma referência →</a></div>
   </aside>
 
   <section class="block svc-sec" id="servicos" data-floor="1" data-label="Serviços">
@@ -105,7 +105,7 @@ layout_head([
       <div class="qz-intro">
         <span class="eyebrow">2º andar · Diagnóstico gratuito</span>
         <h2 class="h2">Seu condomínio está em dia?</h2>
-        <p><?= count(JC_DIAG) ?> perguntas rápidas sobre o que todo prédio precisa manter. No final você vê o que está pendente e pode mandar o resultado para o Junior.</p>
+        <p><?= count(JC_DIAG) ?> perguntas rápidas sobre o que todo prédio precisa manter. No final você vê o que está pendente e pode mandar o resultado para a JC.</p>
         <ul class="qz-facts"><li><b><?= count(JC_DIAG) ?></b>perguntas</li><li><b>1</b>minuto</li><li><b>0</b>cadastro</li></ul>
         <div class="qz-legend" aria-hidden="true"><span><i class="ok"></i>em dia</span><span><i class="no"></i>pendente</span><span><i class="ns"></i>não sei</span></div>
       </div>
@@ -115,7 +115,7 @@ layout_head([
           <div class="qz-floors" id="qz-floors" aria-hidden="true"></div>
         </div>
         <div class="qz-stage" id="qz-stage" aria-live="polite">
-          <noscript><p>Ative o JavaScript para fazer o diagnóstico, ou <a href="<?= e(wa_link('Olá Junior, quero um diagnóstico do meu condomínio.')) ?>">peça pelo WhatsApp</a>.</p></noscript>
+          <noscript><p>Ative o JavaScript para fazer o diagnóstico, ou <a href="<?= e(wa_link('Olá, quero um diagnóstico do meu condomínio.')) ?>">peça pelo WhatsApp</a>.</p></noscript>
         </div>
         <div class="qz-nav" id="qz-nav">
           <button type="button" class="qz-link" id="qz-back">← Voltar</button>
@@ -131,12 +131,12 @@ layout_head([
     <div class="wrap">
       <div class="head">
         <div><span class="eyebrow">3º andar · Como funciona</span><h2 class="h2">Da primeira conversa ao primeiro balancete</h2></div>
-        <p>A troca de síndico segue o rito previsto no Código Civil e na convenção do condomínio. Eu acompanho cada etapa com o conselho.</p>
+        <p>A troca de síndico segue o rito previsto no Código Civil e na convenção do condomínio. A JC acompanha cada etapa com o conselho.</p>
       </div>
       <ol class="steps">
         <li><b>Conversa inicial</b><span class="when">semana 1</span><p>Reunião com o síndico atual ou o conselho para entender o prédio, as contas e os problemas em aberto.</p></li>
         <li><b>Proposta por escrito</b><span class="when">até 5 dias úteis</span><p>Escopo, frequência de visitas e valor mensal, prontos para apresentar aos condôminos.</p></li>
-        <li><b>Assembleia</b><span class="when">conforme convenção</span><p>Apresento a proposta pessoalmente e respondo às perguntas antes da votação.</p></li>
+        <li><b>Assembleia</b><span class="when">conforme convenção</span><p>Apresentamos a proposta pessoalmente e respondemos às perguntas antes da votação.</p></li>
         <li><b>Transição</b><span class="when">primeiros 30 dias</span><p>Levantamento de contratos, documentos, pendências e saldo bancário, com relatório ao conselho.</p></li>
         <li><b>Gestão contínua</b><span class="when">todo mês</span><p>Visitas semanais, prestação de contas mensal e assembleias nos prazos.</p></li>
       </ol>
@@ -146,8 +146,8 @@ layout_head([
   <section class="cond-sec" id="condominios" data-floor="4" data-label="Condomínios">
     <div class="wrap">
       <div class="head">
-        <div><span class="eyebrow">4º andar · Condomínios atendidos</span><h2 class="h2">Condomínios que administro em Fortaleza</h2></div>
-        <p>O primeiro contrato completou <?= $anos ?> anos e continua ativo. <b><?= $nCond ?> condomínios, <?= $totUn ?> unidades.</b> Quer uma referência? Peço ao conselho de um deles para conversar com você.</p>
+        <div><span class="eyebrow">4º andar · Condomínios atendidos</span><h2 class="h2">Condomínios que administramos em Fortaleza</h2></div>
+        <p>O primeiro contrato completou <?= $anos ?> anos e continua ativo. <b><?= $nCond ?> condomínios, <?= $totUn ?> unidades.</b> Quer uma referência? Pedimos ao conselho de um deles para conversar com você.</p>
       </div>
       <div class="condos-x" id="condos-x" tabindex="0" role="region" aria-label="Condomínios atendidos. Deslize para o lado ou use as setas.">
         <div class="condos" id="condos">
@@ -155,7 +155,7 @@ layout_head([
           <article class="condo">
             <div class="pic">
               <?php if ($c['foto']): ?>
-              <img class="photo" loading="lazy" src="<?= e(url($c['foto'])) ?>" alt="Fachada do <?= e($c['nome']) ?>, condomínio administrado por Junior Chagas em Fortaleza" width="460" height="416">
+              <img class="photo" loading="lazy" src="<?= e(url($c['foto'])) ?>" alt="Fachada do <?= e($c['nome']) ?>, condomínio administrado pela JC Síndico Profissional em Fortaleza" width="460" height="416">
               <?php else: ?>
               <span class="nofoto">FOTO EM BREVE</span>
               <?php endif; ?>
@@ -192,7 +192,7 @@ layout_head([
     <div class="wrap">
       <div class="head">
         <div><span class="eyebrow">Depoimentos</span><h2 class="h2">O que dizem os conselhos</h2></div>
-        <p>Palavras de síndicos, conselheiros e moradores dos condomínios que eu administro, publicadas com autorização.</p>
+        <p>Palavras de síndicos, conselheiros e moradores dos condomínios que administramos, publicadas com autorização.</p>
       </div>
       <div class="quotes">
         <?php foreach ($depos as $d): ?>
@@ -212,9 +212,9 @@ layout_head([
       </div>
       <div class="about-text">
         <span class="eyebrow">5º andar · Quem somos</span>
-        <h2 class="h2">Um síndico que conhece o prédio pelo nome dos funcionários</h2>
-        <p class="lead">Comecei como síndico em <?= e(setting('inicio_ano')) ?> e fiz disso a minha profissão. Hoje atendo <?= $nCond ?> condomínios em Fortaleza, sempre com o mesmo método.</p>
-        <p class="muted">Trabalho com três compromissos: transparência nas contas, imparcialidade nas decisões entre moradores e cuidado constante com a saúde financeira do condomínio. Sem vínculo com nenhuma unidade, consigo tratar todos da mesma forma.</p>
+        <h2 class="h2">Uma gestão que conhece o prédio pelo nome dos funcionários</h2>
+        <p class="lead">A JC começou em <?= e(setting('inicio_ano')) ?>, com o Junior Chagas à frente do primeiro condomínio, e fez da gestão condominial profissional a sua especialidade. Hoje atendemos <?= $nCond ?> condomínios em Fortaleza, sempre com o mesmo método.</p>
+        <p class="muted">Trabalhamos com três compromissos: transparência nas contas, imparcialidade nas decisões entre moradores e cuidado constante com a saúde financeira do condomínio. Sem vínculo com nenhuma unidade, tratamos todos da mesma forma.</p>
         <ol class="timeline">
           <li><span class="y">2023</span><div><b>Processos Gerenciais</b><small>Faculdade Estácio de Sá</small></div></li>
           <li><span class="y">2020</span><div><b>Curso de Gestão Condominial</b><small>SENAC Ceará</small></div></li>
@@ -224,23 +224,21 @@ layout_head([
         </ol>
       </div>
     </div>
-    <div class="wrap">
-      <div class="team">
-        <article class="mate">
-          <div class="mate-pic"><img src="<?= e(url('assets/img/felipe-foto.webp')) ?>" alt="Felipe, síndico profissional auxiliar da JC Síndico Profissional" width="900" height="1600" loading="lazy"></div>
-          <div class="mate-txt">
-            <span class="eyebrow">Equipe JC</span>
-            <h3>Felipe</h3>
-            <p class="role">Síndico profissional auxiliar</p>
-            <p>Há mais de 5 anos coordena a rotina de condomínios comerciais, residenciais (horizontais e verticais) e associações, assessorando síndicos, diretores e conselheiros fiscais nas tomadas de decisão. Na JC, acompanha o Junior nas visitas, organiza as demandas dos moradores e faz a ponte com fornecedores, para que nenhum pedido fique sem resposta.</p>
-            <ol class="timeline">
-              <li><span class="y">2026</span><div><b>Processos Gerenciais</b><small>Formação concluída</small></div></li>
-              <li><span class="y">2021–2026</span><div><b>Coordenador de mais de 32 condomínios</b><small>Comerciais, residenciais (horizontais e verticais) e associações</small></div></li>
-              <li><span class="y">2018–2026</span><div><b>Supervisor administrativo</b><small>Uma das maiores redes de supermercados do Ceará</small></div></li>
-            </ol>
-          </div>
-        </article>
-        <aside class="mate-note"><b>Mais de uma pessoa cuidando do seu prédio.</b> Quando o Junior está em assembleia ou vistoria, o Felipe segue com o atendimento, com o mesmo método.</aside>
+    <div class="wrap about about-2">
+      <div class="portrait">
+        <img class="full" src="<?= e(url('assets/img/felipe-foto.webp')) ?>" alt="Felipe Matos, síndico profissional auxiliar da JC Síndico Profissional" width="900" height="1600" loading="lazy">
+        <div class="cap"><b>Felipe Matos</b><span>SÍNDICO PROFISSIONAL AUXILIAR</span></div>
+      </div>
+      <div class="about-text">
+        <span class="eyebrow">Equipe JC</span>
+        <h2 class="h2">Mais de uma pessoa cuidando do seu prédio, com o mesmo método</h2>
+        <p class="lead">Felipe coordena há mais de 5 anos a rotina de condomínios comerciais, residenciais (horizontais e verticais) e associações, assessorando síndicos, diretores e conselheiros fiscais nas tomadas de decisão.</p>
+        <p class="muted">Na JC, acompanha o Junior nas visitas, organiza as demandas dos moradores e faz a ponte com fornecedores, para que nenhum pedido fique sem resposta. Quando o Junior está em assembleia ou vistoria, o Felipe segue com o atendimento.</p>
+        <ol class="timeline">
+          <li><span class="y">2026</span><div><b>Processos Gerenciais</b><small>Formação concluída</small></div></li>
+          <li><span class="y">2021</span><div><b>Coordenador de mais de 32 condomínios</b><small>Comerciais, residenciais (horizontais e verticais) e associações</small></div></li>
+          <li><span class="y">2018</span><div><b>Supervisor administrativo</b><small>Uma das maiores redes de supermercados do Ceará</small></div></li>
+        </ol>
       </div>
     </div>
   </section>
@@ -249,7 +247,7 @@ layout_head([
     <div class="wrap">
       <div class="head">
         <div><span class="eyebrow">6º andar · Vídeos</span><h2 class="h2">Direto do condomínio, em menos de um minuto</h2></div>
-        <p>Dicas e bastidores gravados pelo Junior e pelo Felipe. Os vídeos tocam sem som quando aparecem; toque para ouvir.</p>
+        <p>Dicas e bastidores gravados pela equipe da JC. Os vídeos tocam sem som quando aparecem; toque para ouvir.</p>
       </div>
       <div class="reels" id="reels">
         <?php
@@ -305,12 +303,12 @@ layout_head([
       <div class="faq-side">
         <span class="eyebrow">Dúvidas frequentes</span>
         <h2 class="h2">O que os conselhos costumam perguntar</h2>
-        <p>Se a sua pergunta não estiver aqui, mande no WhatsApp. Respondo até o próximo dia útil.</p>
+        <p>Se a sua pergunta não estiver aqui, mande no WhatsApp. Respondemos até o próximo dia útil.</p>
       </div>
       <div>
         <details open><summary>Uma pessoa de fora do prédio pode ser síndica?</summary><p>Pode. A lei permite que a assembleia eleja um síndico que não seja condômino, pessoa física ou empresa.<small>Código Civil, art. 1.347</small></p></details>
-        <details><summary>Quanto custa um síndico profissional?</summary><p>O valor depende do número de unidades, da estrutura do prédio e da frequência de visitas. Envio uma proposta fechada depois da conversa inicial, sem custo.</p></details>
-        <details><summary>Como fica a administradora que já atende o condomínio?</summary><p>Ela pode continuar. Eu trabalho junto com a administradora atual, que segue cuidando de boletos e folha, e fico responsável pela gestão e pelas decisões do dia a dia.</p></details>
+        <details><summary>Quanto custa um síndico profissional?</summary><p>O valor depende do número de unidades, da estrutura do prédio e da frequência de visitas. Enviamos uma proposta fechada depois da conversa inicial, sem custo.</p></details>
+        <details><summary>Como fica a administradora que já atende o condomínio?</summary><p>Ela pode continuar. A JC trabalha junto com a administradora atual, que segue cuidando de boletos e folha, e fica responsável pela gestão e pelas decisões do dia a dia.</p></details>
         <details><summary>Os moradores conseguem acompanhar as contas?</summary><p>Sim. Todo mês cada unidade recebe a prestação de contas, com receitas, despesas, saldo e fundo de reserva.</p></details>
         <details><summary>E se o condomínio não ficar satisfeito?</summary><p>A assembleia pode destituir o síndico conforme o Código Civil e a convenção do condomínio. Além disso, o contrato prevê encerramento com aviso prévio.<small>Código Civil, art. 1.349</small></p></details>
       </div>
@@ -346,7 +344,7 @@ layout_head([
           <div class="hp" aria-hidden="true"><label for="f-site">Não preencha</label><input id="f-site" name="site_url" tabindex="-1" autocomplete="off"></div>
           <label class="consent full"><input type="checkbox" id="f-ok" name="consentimento" value="1" required aria-describedby="lead-err"> <span>Concordo com o uso dos meus dados para receber a proposta, conforme a <a href="<?= e(url('privacidade')) ?>" target="_blank">Política de Privacidade</a>.</span></label>
           <p class="err-msg full" id="lead-err" role="alert" hidden></p>
-          <div class="form-ok full" id="lead-ok" role="status" tabindex="-1" hidden>Recebi seu pedido. Respondo pelo WhatsApp até o próximo dia útil.</div>
+          <div class="form-ok full" id="lead-ok" role="status" tabindex="-1" hidden>Recebemos seu pedido. Respondemos pelo WhatsApp até o próximo dia útil.</div>
           <div class="form-foot full"><small>Seus dados são usados só para responder este pedido.</small><button class="btn btn-ink" type="submit">Enviar pedido</button></div>
         </form>
 
@@ -365,7 +363,7 @@ layout_head([
           <label class="consent full"><input type="checkbox" id="s-ok" name="consentimento" value="1" required> <span>Concordo com o uso dos meus dados para marcar a conversa, conforme a <a href="<?= e(url('privacidade')) ?>" target="_blank">Política de Privacidade</a>.</span></label>
           <p class="err-msg full" id="sched-err" role="alert" hidden></p>
           <div class="form-ok full" id="sched-ok" role="status" tabindex="-1" hidden></div>
-          <div class="form-foot full"><small>Eu confirmo o horário pelo WhatsApp.</small><button class="btn btn-ink" type="submit">Pedir este horário</button></div>
+          <div class="form-foot full"><small>Confirmamos o horário pelo WhatsApp.</small><button class="btn btn-ink" type="submit">Pedir este horário</button></div>
         </form>
       </div>
       <dl class="cinfo">
