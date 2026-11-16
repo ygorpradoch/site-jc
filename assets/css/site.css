@@ -1123,3 +1123,26 @@ a.post{text-decoration:none;color:inherit}
 .art-share .btn svg{width:17px;height:17px}
 .art-share .btn[hidden]{display:none}
 
+
+/* ===== Celular: mais respiro entre seções, Condomínios em tema claro e entrada por borda curva ===== */
+@media (max-width:640px){
+  section.block{padding-block:72px}
+  .cond-sec,.reels-sec{padding-block:72px}
+  .contact .wrap{padding-block:72px}
+  /* cada seção sobe sobre a anterior com os cantos de cima arredondados (a anterior tem respiro de sobra embaixo) */
+  #diagnostico,#como-funciona,#condominios,#depoimentos,#quem-sou,#videos,#por-que,#guia,#duvidas,#contato{position:relative;z-index:1;margin-top:-28px;border-radius:28px 28px 0 0}
+}
+/* Condomínios claro (só no celular e no tema claro; no escuro continua como está) */
+@media (max-width:640px) and (prefers-color-scheme:light){
+  .cond-sec{color:#0B1F3F;background-color:#D8E7F6;background-image:linear-gradient(rgba(36,72,144,.07) 1px,transparent 1px),linear-gradient(90deg,rgba(36,72,144,.07) 1px,transparent 1px)}
+  .cond-sec .eyebrow{color:#0B6699}
+  .cond-sec .head p,.condo .meta .k,.condo .meta dt,.condo .nofoto,.h-foot{color:#4A5B74}
+  .cond-sec .head p b,.cond-sec .note b{color:#0B1F3F}
+  .cond-sec .note{border-color:#C3D5E8;color:#4A5B74}
+  .condo .pic{background:#C9DDF1;border-color:#A9C1DB}
+  .h-bar{background:rgba(36,72,144,.18)}
+  .h-bar i{background:#244890}
+  .h-arrow{border-color:#B4C8DE;background:#fff;color:#0B1F3F}
+  .h-arrow:hover{border-color:#244890;background:#EEF4FB}
+  .condos-x:focus-visible{outline-color:#244890}
+}
