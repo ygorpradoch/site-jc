@@ -224,21 +224,23 @@ layout_head([
         </ol>
       </div>
     </div>
-    <div class="wrap about about-2">
-      <div class="portrait">
-        <img class="full" src="<?= e(url('assets/img/felipe-foto.webp')) ?>" alt="Felipe Matos, síndico profissional auxiliar da JC Síndico Profissional" width="900" height="1600" loading="lazy">
-        <div class="cap"><b>Felipe Matos</b><span>SÍNDICO PROFISSIONAL AUXILIAR</span></div>
-      </div>
-      <div class="about-text">
-        <span class="eyebrow">Equipe JC</span>
-        <h2 class="h2">Mais de uma pessoa cuidando do seu prédio, com o mesmo método</h2>
-        <p class="lead">Felipe coordena há mais de 5 anos a rotina de condomínios comerciais, residenciais (horizontais e verticais) e associações, assessorando síndicos, diretores e conselheiros fiscais nas tomadas de decisão.</p>
-        <p class="muted">Na JC, acompanha o Junior nas visitas, organiza as demandas dos moradores e faz a ponte com fornecedores, para que nenhum pedido fique sem resposta. Quando o Junior está em assembleia ou vistoria, o Felipe segue com o atendimento.</p>
-        <ol class="timeline">
-          <li><span class="y">2026</span><div><b>Processos Gerenciais</b><small>Formação concluída</small></div></li>
-          <li><span class="y">2021</span><div><b>Coordenador de mais de 32 condomínios</b><small>Comerciais, residenciais (horizontais e verticais) e associações</small></div></li>
-          <li><span class="y">2018</span><div><b>Supervisor administrativo</b><small>Uma das maiores redes de supermercados do Ceará</small></div></li>
-        </ol>
+    <div class="wrap">
+      <div class="team">
+        <article class="mate">
+          <div class="mate-pic"><img src="<?= e(url('assets/img/felipe-foto.webp')) ?>" alt="Felipe Matos, síndico profissional auxiliar da JC Síndico Profissional" width="900" height="1600" loading="lazy"></div>
+          <div class="mate-txt">
+            <span class="eyebrow">Equipe JC</span>
+            <h3>Felipe Matos</h3>
+            <p class="role">Síndico profissional auxiliar</p>
+            <p>Há mais de 5 anos coordena a rotina de condomínios comerciais, residenciais (horizontais e verticais) e associações, assessorando síndicos, diretores e conselheiros fiscais nas tomadas de decisão. Na JC, acompanha o Junior nas visitas, organiza as demandas dos moradores e faz a ponte com fornecedores, para que nenhum pedido fique sem resposta.</p>
+            <ol class="timeline">
+              <li><span class="y">2026</span><div><b>Processos Gerenciais</b><small>Formação concluída</small></div></li>
+              <li><span class="y">2021–2026</span><div><b>Coordenador de mais de 32 condomínios</b><small>Comerciais, residenciais (horizontais e verticais) e associações</small></div></li>
+              <li><span class="y">2018–2026</span><div><b>Supervisor administrativo</b><small>Uma das maiores redes de supermercados do Ceará</small></div></li>
+            </ol>
+          </div>
+        </article>
+        <aside class="mate-note"><b>Mais de uma pessoa cuidando do seu prédio.</b> Quando o Junior está em assembleia ou vistoria, o Felipe segue com o atendimento, com o mesmo método.</aside>
       </div>
     </div>
   </section>
