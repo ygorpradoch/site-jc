@@ -1132,8 +1132,8 @@ a.post{text-decoration:none;color:inherit}
   /* cada seção sobe sobre a anterior com os cantos de cima arredondados (a anterior tem respiro de sobra embaixo) */
   #diagnostico,#como-funciona,#condominios,#depoimentos,#quem-sou,#videos,#por-que,#guia,#duvidas,#contato{position:relative;z-index:1;margin-top:-28px;border-radius:28px 28px 0 0}
 }
-/* Condomínios claro (só no celular e no tema claro; no escuro continua como está) */
-@media (max-width:640px) and (prefers-color-scheme:light){
+/* Condomínios claro no celular (o site público é sempre claro, ver data-theme em layout.php) */
+@media (max-width:640px){
   .cond-sec{color:#0B1F3F;background-color:#D8E7F6;background-image:linear-gradient(rgba(36,72,144,.07) 1px,transparent 1px),linear-gradient(90deg,rgba(36,72,144,.07) 1px,transparent 1px)}
   .cond-sec .eyebrow{color:#0B6699}
   .cond-sec .head p,.condo .meta .k,.condo .meta dt,.condo .nofoto,.h-foot{color:#4A5B74}

@@ -16,7 +16,7 @@ function layout_head(array $o): void
     $img = abs_url($o['image'] ?? 'assets/img/og.jpg');
     $robots = $o['robots'] ?? (cfg('indexar', false) ? 'index, follow' : 'noindex, nofollow');
     ?><!doctype html>
-<html lang="pt-BR">
+<html lang="pt-BR" data-theme="light">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -25,6 +25,7 @@ function layout_head(array $o): void
 <meta name="robots" content="<?= e($robots) ?>">
 <link rel="canonical" href="<?= e($canon) ?>">
 <meta name="theme-color" content="#0A1E3F">
+<meta name="color-scheme" content="light"> <!-- o site público é sempre claro/escuro por seção, independente do modo do aparelho; o painel admin segue o aparelho -->
 <link rel="icon" href="<?= e(url('favicon.svg')) ?>" type="image/svg+xml">
 <link rel="icon" href="<?= e(url('favicon.png')) ?>" type="image/png" sizes="192x192">
 <link rel="apple-touch-icon" href="<?= e(url('apple-touch-icon.png')) ?>">
