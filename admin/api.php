@@ -24,6 +24,14 @@ if ($metodo === 'POST' && !csrf_ok($_SERVER['HTTP_X_CSRF'] ?? null)) {
     json_fail('A página expirou. Recarregue o painel.', 403);
 }
 $in = $metodo === 'POST' ? input() : $_GET;
+$ehMaster = ($user['perfil'] ?? '') === 'master';
+
+/* Perfil "gestor": tudo, menos excluir registros e gerenciar usuários. A trava é aqui no servidor (esconder botão não basta). */
+const SO_MASTER = ['lead_excluir', 'condo_excluir', 'depo_excluir', 'artigo_excluir', 'usuario_convidar', 'usuario_convite_novo', 'usuario_status', 'usuario_excluir', 'usuario_perfil'];
+if (!$ehMaster && in_array($acao, SO_MASTER, true)) {
+    log_evento('acao_negada', $acao);
+    json_fail('Seu perfil (gestor) não tem permissão para esta ação. Peça a um usuário master.', 403);
+}
 $id = (int) ($in['id'] ?? 0);
 
 const LEAD_STATUS = ['novo', 'conversa', 'proposta', 'fechado', 'perdido'];
@@ -460,7 +468,7 @@ case 'senha':
     json_out(['ok' => true]);
 
 case 'usuarios':
-    $rows = db_all('SELECT id, nome, email, ativo, totp_ativo, codigos_recuperacao, convite_hash, convite_expira, ultimo_login, criado_em FROM usuarios ORDER BY id');
+    $rows = db_all('SELECT id, nome, email, perfil, ativo, totp_ativo, codigos_recuperacao, convite_hash, convite_expira, ultimo_login, criado_em FROM usuarios' . ($ehMaster ? '' : ' WHERE id = ' . (int) $user['id']) . ' ORDER BY id');
     $lista = [];
     foreach ($rows as $r) {
         if (!(int) $r['ativo']) $sit = 'desativado';
@@ -468,14 +476,14 @@ case 'usuarios':
         elseif ($r['convite_hash']) $sit = $r['convite_expira'] < date('Y-m-d H:i:s') ? 'ativo' : 'redefinindo';
         else $sit = 'ativo';
         $lista[] = [
-            'id' => (int) $r['id'], 'nome' => $r['nome'], 'email' => $r['email'], 'situacao' => $sit,
+            'id' => (int) $r['id'], 'nome' => $r['nome'], 'email' => $r['email'], 'perfil' => $r['perfil'], 'situacao' => $sit,
             'totp_ativo' => (int) $r['totp_ativo'], 'eu' => (int) $r['id'] === (int) $user['id'],
             'ultimo_login_fmt' => $r['ultimo_login'] ? fmt_data($r['ultimo_login'], true) : null,
             'convite_expira_fmt' => $r['convite_expira'] ? fmt_data($r['convite_expira'], true) : null,
             'recuperacao' => (int) $r['id'] === (int) $user['id'] ? codigos_recuperacao_restantes($r['codigos_recuperacao']) : null,
         ];
     }
-    json_out(['ok' => true, 'usuarios' => $lista]);
+    json_out(['ok' => true, 'usuarios' => $lista, 'master' => $ehMaster]);
 
 case 'usuario_convidar':
     if ($GET) break;
@@ -486,11 +494,12 @@ case 'usuario_convidar':
     if (mb_strlen($nome) < 2) json_fail('Informe o nome da pessoa.');
     if (!filter_var($email, FILTER_VALIDATE_EMAIL)) json_fail('E-mail inválido.');
     if (db_val('SELECT id FROM usuarios WHERE email = ?', [$email])) json_fail('Já existe um usuário com esse e-mail.');
-    db_q('INSERT INTO usuarios (nome, email, senha_hash, criado_por) VALUES (?, ?, ?, ?)', [$nome, $email, password_hash(bin2hex(random_bytes(24)), PASSWORD_DEFAULT), $user['id']]);
+    $perfil = one_of($in['perfil'] ?? '', ['master', 'gestor'], 'gestor');
+    db_q('INSERT INTO usuarios (nome, email, senha_hash, perfil, criado_por) VALUES (?, ?, ?, ?, ?)', [$nome, $email, password_hash(bin2hex(random_bytes(24)), PASSWORD_DEFAULT), $perfil, $user['id']]);
     $novoId = (int) db()->lastInsertId();
     $link = abs_url('admin/') . '?convite=' . convite_criar($novoId);
     $enviado = email_enviar($email, 'Convite para o painel do site JC Síndico', "Olá, $nome!\n\n{$user['nome']} convidou você para o painel do site JC Síndico Profissional.\n\nAbra o link abaixo para criar sua senha e ativar a verificação em 2 etapas (válido por 48 horas):\n\n$link\n\nSe você não esperava este convite, ignore esta mensagem.\n");
-    log_evento('usuario_convidado', $nome . ' <' . $email . '>' . ($enviado ? ' (e-mail enviado)' : ' (link gerado)'));
+    log_evento('usuario_convidado', $nome . ' <' . $email . '> como ' . $perfil . ($enviado ? ' (e-mail enviado)' : ' (link gerado)'));
     json_out(['ok' => true, 'link' => $link, 'email_enviado' => $enviado, 'nome' => $nome, 'email' => $email]);
 
 case 'usuario_convite_novo':
@@ -516,6 +525,18 @@ case 'usuario_status':
     db_q('UPDATE usuarios SET ativo = ? WHERE id = ?', [$ativo, $id]);
     $pdo->commit();
     log_evento('usuario_status', $alvo['nome'] . ' <' . $alvo['email'] . '> ' . ($ativo ? 'reativado' : 'desativado'));
+    json_out(['ok' => true]);
+
+case 'usuario_perfil':
+    if ($GET) break;
+    $alvo = db_one('SELECT id, nome, email, perfil FROM usuarios WHERE id = ?', [$id]);
+    if (!$alvo) json_fail('Usuário não encontrado.', 404);
+    if ((int) $alvo['id'] === (int) $user['id']) json_fail('Você não pode mudar o seu próprio perfil.');
+    $novo = one_of($in['perfil'] ?? '', ['master', 'gestor'], null);
+    if (!$novo) json_fail('Perfil inválido.');
+    if (($rr = reautenticar($user, $in)) !== null) json_fail($rr);
+    db_q('UPDATE usuarios SET perfil = ? WHERE id = ?', [$novo, $id]);
+    log_evento('usuario_perfil', $alvo['nome'] . ' <' . $alvo['email'] . '>: ' . $alvo['perfil'] . ' → ' . $novo);
     json_out(['ok' => true]);
 
 case 'usuario_excluir':
@@ -551,6 +572,7 @@ case 'usuario_2fa_reset':
         admin_logout();
         json_out(['ok' => true, 'sair' => true]);
     }
+    if (!$ehMaster) json_fail('Somente um usuário master pode redefinir o acesso de outra pessoa.', 403);
     // Outra pessoa: o master confirma com senha + código; a senha antiga deixa de valer e a pessoa entra por um novo link
     // (senão quem soubesse só a senha antiga poderia cadastrar o próprio aplicativo). Sessões abertas dela caem.
     if (($rr = reautenticar($user, $in)) !== null) json_fail($rr);

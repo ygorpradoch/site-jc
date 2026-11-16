@@ -59,7 +59,7 @@ if ($metodo === 'POST') {
         } elseif ($senha !== ($_POST['senha2'] ?? '')) {
             $erro = 'As senhas não conferem.';
         } else {
-            db_q('INSERT INTO usuarios (nome, email, senha_hash) VALUES (?, ?, ?)', [$nome, $email, password_hash($senha, PASSWORD_DEFAULT)]);
+            db_q('INSERT INTO usuarios (nome, email, senha_hash, perfil) VALUES (?, ?, ?, \'master\')', [$nome, $email, password_hash($senha, PASSWORD_DEFAULT)]);
             $novoId = (int) db()->lastInsertId();
             log_evento('primeiro_acesso', null, ['usuario' => ['id' => $novoId, 'nome' => $nome, 'email' => $email]]);
             admin_iniciar_pre($novoId);
@@ -126,12 +126,12 @@ $codigosNovos = $estagio === 'codigos' ? (array) ($_SESSION['codigos_novos'] ?? 
 <link rel="stylesheet" href="<?= e(asset('assets/css/site.css')) ?>">
 <link rel="stylesheet" href="<?= e(asset('admin/admin.css')) ?>">
 </head>
-<body class="adm" data-api="<?= e(url('admin/api.php')) ?>" data-site="<?= e(url('')) ?>">
+<body class="adm" data-perfil="<?= e($user['perfil'] ?? '') ?>" data-api="<?= e(url('admin/api.php')) ?>" data-site="<?= e(url('')) ?>">
 <header class="top admin-top scrolled" id="topbar">
   <div class="wrap">
     <a class="brand" href="<?= e(url('admin/')) ?>" aria-label="Painel do site"><img src="<?= e(url('assets/img/logo-h-branco.svg')) ?>" alt="JC Síndico Profissional" width="1148" height="641"></a>
     <?php if ($user): ?>
-    <div class="admin-id"><span><?= e($user['nome']) ?> · master</span><a href="<?= e(url('')) ?>" target="_blank" rel="noopener">Ver site</a>
+    <div class="admin-id"><span><?= e($user['nome']) ?> · <?= ($user['perfil'] ?? '') === 'master' ? 'master' : 'gestor' ?></span><a href="<?= e(url('')) ?>" target="_blank" rel="noopener">Ver site</a>
       <form method="post" class="logout"><input type="hidden" name="csrf" value="<?= e($csrf) ?>"><input type="hidden" name="acao" value="sair"><button type="submit">Sair</button></form>
     </div>
     <?php endif; ?>
@@ -221,7 +221,7 @@ $codigosNovos = $estagio === 'codigos' ? (array) ($_SESSION['codigos_novos'] ?? 
     <button type="button" data-tab="depo">Depoimentos <span class="badge" id="b-depo" hidden></span></button>
     <button type="button" data-tab="artigos">Guia (artigos)</button>
     <span class="grp">Administração</span>
-    <button type="button" data-tab="usuarios">Usuários</button>
+    <button type="button" data-tab="usuarios">Usuários e conta</button>
     <button type="button" data-tab="logs">Registros <span class="badge bad" id="b-logs" hidden></span></button>
     <button type="button" data-tab="config">Configurações</button>
   </nav>

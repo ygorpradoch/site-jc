@@ -9,6 +9,7 @@ CREATE TABLE IF NOT EXISTS usuarios (
   nome          VARCHAR(80)  NOT NULL,
   email         VARCHAR(160) NOT NULL,
   senha_hash    VARCHAR(255) NOT NULL,
+  perfil        ENUM('master','gestor') NOT NULL DEFAULT 'gestor',  -- master: tudo; gestor: tudo menos excluir e gerenciar usuários
   ativo               TINYINT(1)   NOT NULL DEFAULT 1,
   totp_segredo        VARCHAR(255) NULL,          -- segredo da 2ª etapa, cifrado com a app_secret
   totp_ativo          TINYINT(1)   NOT NULL DEFAULT 0,

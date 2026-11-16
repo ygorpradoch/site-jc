@@ -7,7 +7,7 @@ require_once JC_APP . '/totp.php';
  *   1) e-mail + senha  → sessão "pré-login" (pre_uid), ainda sem acesso a nada;
  *   2) código de 6 dígitos do aplicativo autenticador (ou um código de recuperação) → sessão completa (uid).
  * Quem ainda não configurou a 2ª etapa é obrigado a configurar antes de entrar.
- * Só existe um perfil de usuário: "master" (acesso total, pode convidar e gerenciar os outros).
+ * Perfis: "master" (acesso total, convida e gerencia os outros) e "gestor" (tudo, menos excluir registros e gerenciar usuários).
  */
 
 /** Sessão do painel: cookie seguro, só HTTP, mesmo site, restrito a /admin. */
@@ -63,7 +63,7 @@ function admin_user(): ?array
     }
     static $u = null;
     if ($u === null || (int) $u['id'] !== (int) $_SESSION['uid']) {
-        $u = db_one('SELECT id, nome, email, senha_hash FROM usuarios WHERE id = ? AND ativo = 1', [(int) $_SESSION['uid']]);
+        $u = db_one('SELECT id, nome, email, perfil, senha_hash FROM usuarios WHERE id = ? AND ativo = 1', [(int) $_SESSION['uid']]);
         // Usuário desativado/removido, ou senha trocada/redefinida depois que esta sessão começou: sessão encerrada
         if (!$u || !hash_equals(senha_carimbo((string) $u['senha_hash']), (string) ($_SESSION['stamp'] ?? ''))) {
             unset($_SESSION['uid'], $_SESSION['stamp']);

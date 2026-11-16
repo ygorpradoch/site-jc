@@ -1136,3 +1136,5 @@ a.post{text-decoration:none;color:inherit}
 .art-share .sh-btns{display:flex;flex-wrap:wrap;gap:8px}
 .art-share .btn svg{width:17px;height:17px}
 .art-share .btn[hidden]{display:none}
+
+.mate .timeline{margin-top:16px}.mate .timeline li{grid-template-columns:92px 1fr;gap:12px;padding:10px 0}.mate .timeline li:last-child{border-bottom:0}.mate .timeline small{font-size:13px}

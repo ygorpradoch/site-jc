@@ -121,7 +121,7 @@ VIEWS.contatos=function(){
         h('div.acts',sel,
           h('a.btn.btn-ink.btn-sm',{href:waUrl(l.whatsapp,'Olá '+l.nome.split(' ')[0]+', aqui é o Junior, da JC Síndico. Recebi seu contato pelo site.'),target:'_blank',rel:'noopener'},'Responder no WhatsApp'),
           h('button.btn.btn-line.btn-sm',{type:'button',onclick:function(){api('lead_salvar',{id:l.id,notas:notas.value}).then(function(x){if(x.ok)toast('Notas salvas')})}},'Salvar notas'),
-          h('button.btn.btn-line.btn-sm.danger',{type:'button',onclick:function(){if(confirmar('Excluir este contato definitivamente? (use quando a pessoa pedir a exclusão dos dados)'))api('lead_excluir',{id:l.id}).then(function(x){if(x.ok){toast('Contato excluído');leadSel=null;VIEWS.contatos()}})}},'Excluir')
+          h('button.btn.btn-line.btn-sm.danger.so-master',{type:'button',onclick:function(){if(confirmar('Excluir este contato definitivamente? (use quando a pessoa pedir a exclusão dos dados)'))api('lead_excluir',{id:l.id}).then(function(x){if(x.ok){toast('Contato excluído');leadSel=null;VIEWS.contatos()}})}},'Excluir')
         )));
     }else det.appendChild(h('p.empty','Nenhum contato'+(leadFiltro?' com este status.':' ainda.')));
     render(
@@ -237,7 +237,7 @@ VIEWS.condos=function(edit){
         h('td.num',c.unidades),h('td.num',c.desde.slice(5,7)+'/'+c.desde.slice(0,4)),
         h('td',toggle(c.exibir==1,'Exibir '+c.nome,function(v){api('condo_exibir',{id:c.id,exibir:v?1:0}).then(function(x){if(x.ok)toast(v?'Exibido no site':'Oculto do site')})})),
         h('td.acts-cell',h('button.btn.btn-line.btn-sm',{type:'button',onclick:function(){VIEWS.condos(c)}},'Editar'),
-          h('button.btn.btn-line.btn-sm.danger',{type:'button',onclick:function(){if(confirmar('Remover '+c.nome+' do site?'))api('condo_excluir',{id:c.id}).then(function(x){if(x.ok){toast('Removido');VIEWS.condos()}})}},'Remover'))
+          h('button.btn.btn-line.btn-sm.danger.so-master',{type:'button',onclick:function(){if(confirmar('Remover '+c.nome+' do site?'))api('condo_excluir',{id:c.id}).then(function(x){if(x.ok){toast('Removido');VIEWS.condos()}})}},'Remover'))
       ));
     });
     var c=edit||{},nome=h('input',{required:true,maxLength:120,placeholder:'Ex.: Residencial Sol',value:c.nome||''}),bairro=h('input',{maxLength:80,placeholder:'Ex.: Aldeota',value:c.bairro||''}),
@@ -286,7 +286,7 @@ VIEWS.depo=function(edit){
           d.status!=='publicado'?h('button.btn.btn-ink.btn-sm',{type:'button',onclick:set(d,'publicado','Depoimento publicado')},'Publicar'):h('button.btn.btn-line.btn-sm',{type:'button',onclick:set(d,'recusado','Retirado do site')},'Tirar do site'),
           d.status==='pendente'?h('button.btn.btn-line.btn-sm',{type:'button',onclick:set(d,'recusado','Depoimento recusado')},'Recusar'):null,
           h('button.btn.btn-line.btn-sm',{type:'button',onclick:function(){VIEWS.depo(d)}},'Editar'),
-          h('button.btn.btn-line.btn-sm.danger',{type:'button',onclick:function(){if(confirmar('Excluir este depoimento?'))api('depo_excluir',{id:d.id}).then(function(x){if(x.ok){toast('Excluído');VIEWS.depo()}})}},'Excluir')));
+          h('button.btn.btn-line.btn-sm.danger.so-master',{type:'button',onclick:function(){if(confirmar('Excluir este depoimento?'))api('depo_excluir',{id:d.id}).then(function(x){if(x.ok){toast('Excluído');VIEWS.depo()}})}},'Excluir')));
     })):h('p.empty','Nenhum depoimento ainda. Envie o link abaixo para clientes satisfeitos.');
     var d=edit||{},texto=h('textarea',{rows:3,maxLength:600,required:true}),nome=h('input',{maxLength:100,required:true,value:d.nome||''}),papel=h('input',{maxLength:80,placeholder:'Ex.: conselheiro fiscal',value:d.papel||''}),cond=h('input',{maxLength:120,value:d.condominio||''}),aut=h('input',{type:'checkbox',checked:!!d.id});
     texto.value=d.texto||'';
@@ -318,7 +318,7 @@ VIEWS.artigos=function(){
           h('span.acts-cell',a.status==='publicado'?pill('publicado','p-ok'):pill('rascunho','p-mute'),
             h('button.btn.btn-line.btn-sm',{type:'button',onclick:function(){get('artigo',{id:a.id}).then(function(x){if(x.ok)editor(x.artigo)})}},'Editar'),
             h('a.btn.btn-line.btn-sm',{href:'previa.php?id='+a.id,target:'_blank',rel:'noopener'},'Ver'),
-            h('button.btn.btn-line.btn-sm.danger',{type:'button',onclick:function(){if(confirmar('Excluir o artigo “'+a.titulo+'”?'))api('artigo_excluir',{id:a.id}).then(function(x){if(x.ok){toast('Artigo excluído');VIEWS.artigos()}})}},'Excluir')));
+            h('button.btn.btn-line.btn-sm.danger.so-master',{type:'button',onclick:function(){if(confirmar('Excluir o artigo “'+a.titulo+'”?'))api('artigo_excluir',{id:a.id}).then(function(x){if(x.ok){toast('Artigo excluído');VIEWS.artigos()}})}},'Excluir')));
       })):h('p.empty','Nenhum artigo.'))
     );
   });
@@ -467,17 +467,18 @@ VIEWS.usuarios=function(extra){
     var lista=h('ul.list.users',r.usuarios.map(function(u){
       var pend=u.situacao==='convite'||u.situacao==='convite_expirado';
       return h('li.user-li',h('div.t',h('b',u.nome+(u.eu?' (você)':'')),h('small',u.email+' · '+(u.ultimo_login_fmt?'último acesso '+u.ultimo_login_fmt:'ainda não entrou')+(u.convite_expira_fmt&&(pend||u.situacao==='redefinindo')?' · link válido até '+u.convite_expira_fmt:''))),
-        h('span.acts-cell',pill('Master','p-info'),pill(SIT[u.situacao][0],SIT[u.situacao][1]),u.totp_ativo?pill('2 etapas ativa','p-ok'):pill('2 etapas pendente','p-warn'),
+        h('span.acts-cell',pill(u.perfil==='master'?'Master':'Gestor',u.perfil==='master'?'p-info':'p-mute'),pill(SIT[u.situacao][0],SIT[u.situacao][1]),u.totp_ativo?pill('2 etapas ativa','p-ok'):pill('2 etapas pendente','p-warn'),
           u.eu?null:[
+            h('button.btn.btn-line.btn-sm',{type:'button',onclick:function(){var novo=u.perfil==='master'?'gestor':'master';if(confirmar(novo==='master'?u.nome+' passará a ter acesso total (master), inclusive para excluir e gerenciar usuários. Continuar?':u.nome+' deixará de poder excluir registros e gerenciar usuários. Continuar?'))pedirAutorizacao('Mudar perfil de '+u.nome,function(sn,cd){return api('usuario_perfil',{id:u.id,perfil:novo,senha:sn,codigo:cd}).then(function(x){if(x.ok){toast('Perfil alterado');VIEWS.usuarios();return true}return false})})}},u.perfil==='master'?'Tornar gestor':'Tornar master'),
             u.situacao!=='desativado'?h('button.btn.btn-line.btn-sm',{type:'button',onclick:function(){if(confirmar(pend?'Gerar um novo convite para '+u.nome+'? O link anterior deixa de valer.':'Gerar um link para '+u.nome+' criar uma nova senha? Ela continua entrando com a senha atual até usar o link.'))pedirAutorizacao(pend?'Novo convite para '+u.nome:'Redefinir senha de '+u.nome,function(sn,cd){return api('usuario_convite_novo',{id:u.id,senha:sn,codigo:cd}).then(function(x){if(x.ok){resp(x);return true}return false})})}},pend?'Novo convite':'Redefinir senha'):null,
             u.totp_ativo?h('button.btn.btn-line.btn-sm',{type:'button',onclick:function(){if(confirmar('Redefinir a verificação em 2 etapas de '+u.nome+'? A senha atual dela deixa de valer: ela receberá um link para criar uma nova senha e configurar o aplicativo de novo, e as sessões abertas dela caem.'))pedirAutorizacao('Redefinir 2 etapas de '+u.nome,function(sn,cd){return api('usuario_2fa_reset',{id:u.id,senha:sn,codigo:cd}).then(function(x){if(x.ok){resp(x);return true}return false})})}},'Redefinir 2 etapas'):null,
             h('button.btn.btn-line.btn-sm',{type:'button',onclick:function(){var des=u.situacao!=='desativado';if(!des||confirmar('Desativar o acesso de '+u.nome+'? Ela perde o acesso na hora.'))api('usuario_status',{id:u.id,ativo:des?0:1}).then(function(x){if(x.ok){toast(des?'Acesso desativado':'Acesso reativado');VIEWS.usuarios()}})}},u.situacao==='desativado'?'Reativar':'Desativar'),
             h('button.btn.btn-line.btn-sm.danger',{type:'button',onclick:function(){if(confirmar('Remover '+u.nome+' definitivamente?'))pedirAutorizacao('Remover '+u.nome,function(sn,cd){return api('usuario_excluir',{id:u.id,senha:sn,codigo:cd}).then(function(x){if(x.ok){toast('Usuário removido');VIEWS.usuarios();return true}return false})})}},'Remover')]));
     }));
 
-    var cNome=h('input',{maxLength:80,required:true,placeholder:'Nome da pessoa'}),cEmail=h('input',{type:'email',maxLength:160,required:true,placeholder:'email@exemplo.com',autocomplete:'off'});
-    var convForm=h('form.inline-form.bl-form',{onsubmit:function(e){e.preventDefault();var nome=cNome.value,email=cEmail.value;pedirAutorizacao('Convidar '+nome,function(sn,cd){return api('usuario_convidar',{nome:nome,email:email,senha:sn,codigo:cd}).then(function(x){if(x.ok){resp(x);return true}return false})})}},
-      field('Nome',cNome),field('E-mail',cEmail),h('button.btn.btn-ink.btn-sm',{type:'submit'},'Convidar'));
+    var cNome=h('input',{maxLength:80,required:true,placeholder:'Nome da pessoa'}),cEmail=h('input',{type:'email',maxLength:160,required:true,placeholder:'email@exemplo.com',autocomplete:'off'}),cPerfil=h('select',h('option',{value:'gestor'},'Gestor (tudo, exceto excluir e gerenciar usuários)'),h('option',{value:'master'},'Master (acesso total)'));
+    var convForm=h('form.inline-form.bl-form',{onsubmit:function(e){e.preventDefault();var nome=cNome.value,email=cEmail.value,perfil=cPerfil.value;pedirAutorizacao('Convidar '+nome,function(sn,cd){return api('usuario_convidar',{nome:nome,email:email,perfil:perfil,senha:sn,codigo:cd}).then(function(x){if(x.ok){resp(x);return true}return false})})}},
+      field('Nome',cNome),field('E-mail',cEmail),field('Perfil',cPerfil),h('button.btn.btn-ink.btn-sm',{type:'submit'},'Convidar'));
 
     /* minha conta */
     var at=h('input',{type:'password',autocomplete:'current-password',required:true}),nv=h('input',{type:'password',autocomplete:'new-password',required:true,minLength:8}),nv2=h('input',{type:'password',autocomplete:'new-password',required:true,minLength:8}),cod=h('input',{inputMode:'numeric',autocomplete:'one-time-code',maxLength:7,required:true,placeholder:'6 dígitos'});
@@ -496,11 +497,11 @@ VIEWS.usuarios=function(extra){
         formSeguro('Trocou de celular? Reconfigure a verificação: você sai agora e configura o novo aparelho ao entrar de novo.','Reconfigurar 2 etapas',true,function(s,c){if(confirmar('Isto encerra a sua sessão. Continuar?'))api('usuario_2fa_reset',{id:eu.id,senha:s,codigo:c}).then(function(x){if(x.ok)location.reload()})})));
 
     render(
-      title('Usuários','Quem tem acesso ao painel. Todos têm o perfil Master: acesso total e podem convidar outras pessoas. Todo acesso exige senha e verificação em 2 etapas.'),
+      title(r.master?'Usuários':'Minha conta',r.master?'Quem tem acesso ao painel. Master: acesso total, convida e gerencia pessoas. Gestor: tudo, exceto excluir registros e gerenciar usuários. Todo acesso exige senha e verificação em 2 etapas.':'Você tem o perfil Gestor: pode usar todo o painel, exceto excluir registros e gerenciar usuários.'),
       extra&&extra.convite?conviteBox(extra.convite):null,
       extra&&extra.codigos?codigosBox(extra.codigos):null,
-      h('div.panel.mt',h('h3','Pessoas com acesso'),lista),
-      h('div.panel',h('h3','Convidar uma pessoa'),h('div.pad',h('p.muted','Ela recebe um link (válido por 48 horas) para criar a senha e ativar a verificação em 2 etapas.')),convForm),
+      r.master?h('div.panel.mt',h('h3','Pessoas com acesso'),lista):null,
+      r.master?h('div.panel',h('h3','Convidar uma pessoa'),h('div.pad',h('p.muted','Ela recebe um link (válido por 48 horas) para criar a senha e ativar a verificação em 2 etapas.')),convForm):null,
       h('h3.sec','Minha conta · '+eu.nome),fs,seguranca
     );
   });

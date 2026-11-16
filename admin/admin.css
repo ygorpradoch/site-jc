@@ -17,6 +17,10 @@ body.adm{background:var(--paper)}
 .btn.danger{color:var(--bad)}
 .btn.danger:hover{border-color:var(--bad)}
 .acts-cell{display:flex;flex-wrap:wrap;gap:6px;align-items:center;justify-content:flex-end}
+/* Em tabela, a célula precisa continuar sendo célula (flex quebrava a linha) e o interruptor precisa de largura própria */
+td.acts-cell{display:table-cell;text-align:right;white-space:nowrap}
+td.acts-cell .btn+.btn{margin-left:6px}
+.tbl .toggle{display:inline-block;vertical-align:middle}
 .tbl tbody tr:has(.toggle){cursor:default}
 .fgrid2{display:grid;grid-template-columns:1fr 1fr;gap:16px;padding:18px}
 .fgrid2 .full{grid-column:1/-1}
@@ -150,3 +154,5 @@ dialog.reauth::backdrop{background:rgba(5,13,29,.55)}
 dialog.reauth form{display:grid;gap:14px;padding:22px}
 dialog.reauth h3{font:800 20px var(--f-display)}
 dialog.reauth p{margin:0;font-size:14px}
+
+body[data-perfil="gestor"] .so-master{display:none!important}
