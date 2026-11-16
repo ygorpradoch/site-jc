@@ -169,3 +169,6 @@ body[data-perfil="gestor"] .so-master{display:none!important}
 .hero-opt .mini.escura::after{background:#355fa8;box-shadow:24px 6px 0 -2px #222}
 .hero-opt .t{display:grid;gap:3px}
 .hero-opt .t small{color:var(--ink-soft);font-size:12.5px;line-height:1.35}
+.hero-grp{margin-top:16px;padding-top:14px;border-top:1px solid var(--line)}
+.hero-grp h4{margin:0;font:700 16px var(--f-display)}
+.hero-grp .muted{margin:2px 0 0;font-size:13.5px}

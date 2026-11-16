@@ -352,7 +352,8 @@ function boot(){
         if(i===cards.length-1)return;
         var st={trigger:cards[i+1],start:'top bottom',end:'top '+(84+(i+1)*16)+'px',scrub:true};
         gsap.to(c,{scale:mobile?.9:.93,ease:'none',scrollTrigger:st});
-        gsap.to(c.querySelector('.dim'),{opacity:.5,ease:'none',scrollTrigger:{trigger:st.trigger,start:st.start,end:st.end,scrub:true}});
+        /* escurecimento do cartão que fica para trás: leve e só quando o próximo já está perto (no celular, 50% deixava o cartão lido cinza) */
+        gsap.to(c.querySelector('.dim'),{opacity:mobile?.18:.5,ease:'none',scrollTrigger:{trigger:st.trigger,start:mobile?'top 68%':st.start,end:st.end,scrub:true}});
       });
       return function(){};
     });

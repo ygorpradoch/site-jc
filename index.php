@@ -8,7 +8,11 @@ $nCond = count($condos);
 $anos = anos_gestao();
 $depos = depoimentos_site();
 $posts = artigos_publicados(3);
-$heroEstilo = setting('hero_estilo') === 'clara' ? 'clara' : 'escura'; // Painel > Configurações > Primeira tela
+// Primeira tela (Painel > Configurações): escolha separada para computador e celular; sem escolha própria, vale 'hero_estilo'.
+$ehCelular = (bool) preg_match('/Mobi|Android|iPhone|iPod|Windows Phone/i', (string) ($_SERVER['HTTP_USER_AGENT'] ?? ''));
+$heroEscolha = setting($ehCelular ? 'hero_estilo_mobile' : 'hero_estilo_web');
+$heroEstilo = in_array($heroEscolha, ['escura', 'clara'], true) ? $heroEscolha : (setting('hero_estilo') === 'clara' ? 'clara' : 'escura');
+header('Vary: User-Agent');
 $wa = setting('whatsapp');
 $waDigits = preg_replace('/\D+/', '', $wa);
 $waRef = wa_link('Olá, gostaria de falar com o conselho de um condomínio atendido pela JC.');

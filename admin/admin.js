@@ -556,18 +556,24 @@ VIEWS.config=function(){
       F[x[0]]=[x[1],h('input',{type:x[2]||'text',value:c[x[0]]||''})]});
     var form=h('form.panel.mt',{onsubmit:function(e){e.preventDefault();var d={};Object.keys(F).forEach(function(k){d[k]=F[k][1].value});api('config_salvar',d).then(function(x){if(x.ok)toast('Alterações salvas. Já aparecem no site.')})}},
       h('h3','Dados de contato e endereço'),h('div.fgrid2',Object.keys(F).map(function(k){return field(F[k][0],F[k][1])}),h('div.full.right',h('button.btn.btn-ink',{type:'submit'},'Salvar alterações'))));
-    var cur=c.hero_estilo==='clara'?'clara':'escura',escolha=cur;
+    var base=c.hero_estilo==='clara'?'clara':'escura';
+    var escolha={hero_estilo_web:(c.hero_estilo_web==='clara'||c.hero_estilo_web==='escura')?c.hero_estilo_web:base,
+                 hero_estilo_mobile:(c.hero_estilo_mobile==='clara'||c.hero_estilo_mobile==='escura')?c.hero_estilo_mobile:base};
     var OPTS=[['escura','Escura (versão original)','Fundo azul-marinho com mostrador de elevador, palavras grandes e as duas fotos em movimento.'],
               ['clara','Clara, com o prédio','Céu claro, o prédio em azul atrás da dupla e janelas amarelas que acendem em Serviços ao rolar.']];
-    var radios=OPTS.map(function(o){
-      var inp=h('input',{type:'radio',name:'hero_estilo',value:o[0]});inp.checked=(o[0]===cur);
-      inp.addEventListener('change',function(){escolha=o[0]});
-      return h('label.hero-opt',inp,h('span.mini.'+o[0]),h('span.t',h('b',o[1]),h('small',o[2])));
-    });
-    var formHero=h('form.panel.mt',{onsubmit:function(e){e.preventDefault();api('config_salvar',{hero_estilo:escolha}).then(function(x){if(x.ok)toast('Primeira tela atualizada. Pode levar até 5 minutos para aparecer a quem já visitou o site.')})}},
+    function grupo(chave,titulo,sub){
+      var radios=OPTS.map(function(o){
+        var inp=h('input',{type:'radio',name:chave,value:o[0]});inp.checked=(o[0]===escolha[chave]);
+        inp.addEventListener('change',function(){escolha[chave]=o[0]});
+        return h('label.hero-opt',inp,h('span.mini.'+o[0]),h('span.t',h('b',o[1]),h('small',o[2])));
+      });
+      return h('div.hero-grp',h('h4',titulo),h('p.muted',sub),h('div.hero-opts',radios));
+    }
+    var formHero=h('form.panel.mt',{onsubmit:function(e){e.preventDefault();api('config_salvar',{hero_estilo_web:escolha.hero_estilo_web,hero_estilo_mobile:escolha.hero_estilo_mobile}).then(function(x){if(x.ok)toast('Primeira tela atualizada. Pode levar até 5 minutos para aparecer a quem já visitou o site.')})}},
       h('h3','Primeira tela do site'),
-      h('p.muted','Escolha qual abertura aparece na página inicial. Você pode voltar para a outra a qualquer momento.'),
-      h('div.hero-opts',radios),
+      h('p.muted','Escolha a abertura da página inicial separadamente para computador e celular. Você pode trocar quando quiser.'),
+      grupo('hero_estilo_web','No computador (web)','Telas largas: computador e tablet grande.'),
+      grupo('hero_estilo_mobile','No celular','Aparelhos celulares, em pé ou deitados.'),
       h('div.full.right',h('button.btn.btn-ink',{type:'submit'},'Salvar escolha')));
     render(title('Configurações','Dados que aparecem em todo o site. A troca de senha fica em Usuários → Minha conta.'),form,formHero);
   });

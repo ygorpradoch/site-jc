@@ -12,7 +12,9 @@ const JC_SETTINGS_DEFAULT = [
     'instagram' => 'https://www.instagram.com/jc.sindicoprofissional/',
     'linkedin' => 'https://www.linkedin.com/in/junior-chagas-13ba17188/',
     'inicio_ano' => '2014',
-    'hero_estilo' => 'escura', // primeira tela do site: 'escura' (original) ou 'clara' (prédio)
+    'hero_estilo' => 'escura', // primeira tela do site: 'escura' (original) ou 'clara' (prédio); vale para as duas telas enquanto não houver escolha própria
+    'hero_estilo_web' => '',    // escolha só para computador/tablet grande ('' = usa hero_estilo)
+    'hero_estilo_mobile' => '', // escolha só para celular ('' = usa hero_estilo)
 ];
 
 function settings(bool $fresh = false): array
