@@ -329,12 +329,11 @@ function boot(){
         .from('.sh-chips li',{y:16,opacity:0,stagger:.08,duration:.6},.5)
         .from('.sh-copy > *',{y:16,stagger:.05,duration:.6},.1);
       /* desktop: abertura presa enquanto a cena anima; celular: rola normalmente, só com movimento leve */
-      var heroTl=gsap.timeline({scrollTrigger:mobile?{trigger:'.sh',start:'top top',end:'bottom top',scrub:.5}:{trigger:'.sh',start:'top top',end:'+=60%',scrub:.7,pin:true}})
+      var heroTl=gsap.timeline({scrollTrigger:mobile?{trigger:'.sh',start:'top top',end:'bottom top',scrub:.25,fastScrollEnd:true}:{trigger:'.sh',start:'top top',end:'+=45%',scrub:.3,pin:true,anticipatePin:1,fastScrollEnd:true}})
         .to('.sh-back',{xPercent:-38,ease:'none'},0)
         .to('.sh-front',{xPercent:mobile?-95:-60,ease:'none'},0)
         .to('#dial',{rotate:120,ease:'none'},0)
-        .to('.sh-photo',{scale:1.05,ease:'none',transformOrigin:'50% 100%'},0)
-        .to('.sh-photo2',{xPercent:-30,scale:.97,ease:'none',transformOrigin:'50% 100%'},0);
+        .to('.sh-photo2',{xPercent:-30,ease:'none'},0);
       if(!mobile)heroTl
         .to('.sh-chips li:nth-child(1)',{y:-110,ease:'none'},0)
         .to('.sh-chips li:nth-child(2)',{y:-170,ease:'none'},0)

@@ -18,7 +18,7 @@ layout_head([
     'title' => 'Síndico profissional em Fortaleza | JC Síndico Profissional',
     'desc' => "A JC Síndico Profissional administra condomínios em Fortaleza desde 2014. Gestão financeira, manutenção, assembleias e visita semanal, com prestação de contas todo mês. {$nCond} condomínios, {$totUn} unidades.",
     'path' => '',
-    'preload' => ['assets/img/junior-novo.webp'],
+    'preload' => ['assets/img/junior-frontal.webp'],
     'jsonld' => jsonld_negocio(),
 ]);
 ?>
@@ -60,8 +60,8 @@ layout_head([
       <circle r="78" stroke="rgba(60,180,240,.5)" stroke-width=".35" stroke-dasharray="1 2.2" fill="none"/>
       <g id="ticks"></g>
     </svg>
-    <img class="sh-photo2" src="<?= e(url('assets/img/felipe-bracos.webp')) ?>" alt="Felipe, da equipe JC, de braços cruzados" width="734" height="1000">
-    <img class="sh-photo" fetchpriority="high" src="<?= e(url('assets/img/junior-novo.webp')) ?>" alt="Junior Chagas, síndico profissional, de braços cruzados com a camisa da JC" width="965" height="1193">
+    <img class="sh-photo2" src="<?= e(url('assets/img/felipe-frontal.webp')) ?>" alt="Felipe, da equipe JC, de braços cruzados" width="1100" height="1375">
+    <img class="sh-photo" fetchpriority="high" src="<?= e(url('assets/img/junior-frontal.webp')) ?>" alt="Junior Chagas, síndico profissional, de braços cruzados com a camisa da JC" width="1100" height="1375">
     <div class="sh-front" aria-hidden="true">EM BOAS <em>MÃOS</em></div>
     <ul class="sh-chips" aria-label="Números da gestão">
       <li><b><?= $anos ?></b>anos de gestão</li>
