@@ -854,6 +854,13 @@ details.svc{border-top:0;border-bottom:0}
 .team .mate-txt{padding:24px 28px;align-self:center}
 @media (min-width:900px){.team .mate{grid-template-columns:260px 1fr}}
 @media (max-width:899px){.team .mate{grid-template-columns:1fr}.team .mate-pic{min-height:340px}.team .mate-txt{padding:18px 18px 20px}}
+.about-intro{max-width:760px;margin-bottom:40px}
+.about-intro .lead{font-size:19px;margin-top:20px}
+.about-intro .muted{color:var(--ink-soft);margin-top:14px}
+.team-solo{margin-top:0;grid-template-columns:1fr!important}
+.team + .team{margin-top:18px}
+.team-solo .mate-txt p:not(.role){max-width:72ch}
+.team .mate-pic.jr img{object-position:50% 16%}
 .mate .timeline{margin-top:16px}.mate .timeline li{grid-template-columns:92px 1fr;gap:12px;padding:10px 0}.mate .timeline li:last-child{border-bottom:0}.mate .timeline small{font-size:13px}
 
 /* ===== 2º ANDAR: diagnóstico, uma pergunta por vez ===== */

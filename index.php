@@ -205,26 +205,31 @@ layout_head([
   <?php endif; ?>
 
   <section class="block alt" id="quem-sou" data-floor="5" data-label="Quem somos">
-    <div class="wrap about">
-      <div class="portrait">
-        <img class="full" src="<?= e(url('assets/img/junior-foto.webp')) ?>" alt="Junior Chagas com a camisa da JC Síndico Profissional" width="900" height="1599" loading="lazy">
-        <div class="cap"><b>Junior Chagas</b><span>SÍNDICO PROFISSIONAL · CNPJ <?= e(setting('cnpj')) ?></span></div>
-      </div>
-      <div class="about-text">
+    <div class="wrap">
+      <div class="about-intro">
         <span class="eyebrow">5º andar · Quem somos</span>
         <h2 class="h2">Uma gestão que conhece o prédio pelo nome dos funcionários</h2>
         <p class="lead">A JC começou em <?= e(setting('inicio_ano')) ?>, com o Junior Chagas à frente do primeiro condomínio, e fez da gestão condominial profissional a sua especialidade. Hoje atendemos <?= $nCond ?> condomínios em Fortaleza, sempre com o mesmo método.</p>
         <p class="muted">Trabalhamos com três compromissos: transparência nas contas, imparcialidade nas decisões entre moradores e cuidado constante com a saúde financeira do condomínio. Sem vínculo com nenhuma unidade, tratamos todos da mesma forma.</p>
-        <ol class="timeline">
-          <li><span class="y">2023</span><div><b>Processos Gerenciais</b><small>Faculdade Estácio de Sá</small></div></li>
-          <li><span class="y">2020</span><div><b>Curso de Gestão Condominial</b><small>SENAC Ceará</small></div></li>
-          <li><span class="y">2017</span><div><b>Síndico Profissional</b><small>Curso SíndicoNet</small></div></li>
-          <li><span class="y">2014</span><div><b>Primeiro condomínio sob gestão</b><small>Cond. Praia Nova, até hoje</small></div></li>
-          <li><span class="y">2008</span><div><b>Pedagogia</b><small>Faculdade da Ibiapaba</small></div></li>
-        </ol>
       </div>
-    </div>
-    <div class="wrap">
+      <div class="team team-solo">
+        <article class="mate">
+          <div class="mate-pic jr"><img src="<?= e(url('assets/img/junior-foto.webp')) ?>" alt="Junior Chagas, síndico profissional, com a camisa da JC Síndico Profissional" width="900" height="1599" loading="lazy"></div>
+          <div class="mate-txt">
+            <span class="eyebrow">Fundador da JC</span>
+            <h3>Junior Chagas</h3>
+            <p class="role">Síndico profissional · CNPJ <?= e(setting('cnpj')) ?></p>
+            <p>Síndico profissional desde <?= e(setting('inicio_ano')) ?>, com visita semanal e prestação de contas todo mês. Responde pela gestão dos <?= $nCond ?> condomínios atendidos pela JC e pelo método que a equipe segue.</p>
+            <ol class="timeline">
+              <li><span class="y">2023</span><div><b>Processos Gerenciais</b><small>Faculdade Estácio de Sá</small></div></li>
+              <li><span class="y">2020</span><div><b>Curso de Gestão Condominial</b><small>SENAC Ceará</small></div></li>
+              <li><span class="y">2017</span><div><b>Síndico Profissional</b><small>Curso SíndicoNet</small></div></li>
+              <li><span class="y">2014</span><div><b>Primeiro condomínio sob gestão</b><small>Cond. Praia Nova, até hoje</small></div></li>
+              <li><span class="y">2008</span><div><b>Pedagogia</b><small>Faculdade da Ibiapaba</small></div></li>
+            </ol>
+          </div>
+        </article>
+      </div>
       <div class="team">
         <article class="mate">
           <div class="mate-pic"><img src="<?= e(url('assets/img/felipe-foto.webp')) ?>" alt="Felipe Matos, síndico profissional auxiliar da JC Síndico Profissional" width="900" height="1600" loading="lazy"></div>
