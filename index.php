@@ -234,7 +234,7 @@ layout_head([
     <div class="wrap">
       <div class="head">
         <div><span class="eyebrow">6º andar · Vídeos</span><h2 class="h2">Direto do condomínio, em menos de um minuto</h2></div>
-        <p>Dicas e bastidores gravados pela equipe da JC. Os vídeos tocam sem som quando aparecem; toque para ouvir.</p>
+        <p>Dicas e bastidores gravados pela equipe da JC. O primeiro vídeo toca com som ao chegar aqui e os outros vêm em seguida. Se o som não ligar, toque na tela ou no botão Som.</p>
       </div>
       <div class="reels" id="reels">
         <?php

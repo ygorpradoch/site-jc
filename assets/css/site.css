@@ -1146,3 +1146,28 @@ a.post{text-decoration:none;color:inherit}
   .h-arrow:hover{border-color:#244890;background:#EEF4FB}
   .condos-x:focus-visible{outline-color:#244890}
 }
+
+/* ===== Celular: ritmo claro/escuro mais próximo do desktop, "Por que" em cartões e fotos da equipe com mais corpo ===== */
+@media (max-width:640px){
+  /* Serviços escura, porém bem mais curta: cartões sem altura mínima de tela */
+  .scard{min-height:0;margin-bottom:16px}
+  .stack{padding-bottom:0}
+  /* Vídeos clara (Contato e rodapé seguem escuros) */
+  .reels-sec{background:#DDEAF8;color:#0B1F3F}
+  .reels-sec .eyebrow{color:#0B6699}
+  .reels-sec .head p,.reel figcaption,.reels-foot{color:#4A5B74}
+  .reel figcaption b{color:#0B1F3F}
+  .reels-foot a{color:#244890}
+  .reel-box{border-color:#B4C8DE;box-shadow:0 18px 36px -20px rgba(11,31,63,.45)}
+  /* Quem somos: foto em proporção de retrato, mostrando da cabeça até a cintura */
+  .team .mate-pic{min-height:0;height:auto;aspect-ratio:2/3}
+  .team .mate-pic img,.team .mate-pic.jr img{object-position:50% 0%}
+  /* Síndico morador x profissional: cada tema vira um cartão com os dois lados bem separados */
+  .compare tr{border-radius:16px;box-shadow:var(--shadow);margin-bottom:16px;border-color:var(--line)}
+  .compare tbody th{padding:16px 18px 12px;font-size:18px;border-bottom:1px solid var(--line)}
+  .compare td{margin:10px 12px 0;padding:12px 14px;border-radius:10px;font-size:15px;line-height:1.45;border-left:3px solid transparent}
+  .compare td::before{margin-bottom:4px}
+  .compare td:nth-of-type(1){background:var(--paper);border-left-color:#9AA9BD;color:var(--ink-soft)}
+  .compare td:last-child{margin-bottom:12px;background:color-mix(in srgb,var(--sun) 16%,#fff);border-left-color:var(--sun);color:var(--ink);font-weight:500}
+  .compare td:last-child::before{content:"✓ " attr(data-l);color:#0B6699}
+}
