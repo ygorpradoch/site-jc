@@ -63,7 +63,7 @@ uploads/            Fotos enviadas pelo painel (só imagens; scripts não execut
 
 ### 5. Primeiro acesso ao painel
 1. Abra `https://novo.juniorsindico.pro/admin/`.
-2. Informe o `setup_token`, nome, e-mail e senha (mín. 10 caracteres, letras e números).
+2. Informe o `setup_token`, nome, e-mail e senha (mín. 8 caracteres, com letras, números e caractere especial).
 3. O painel exige configurar a **verificação em 2 etapas** antes de entrar: instale Google Authenticator, Microsoft Authenticator ou Authy, leia o QR code e digite o código. Em seguida **guarde os 10 códigos de recuperação** (aparecem uma única vez).
 4. Depois de criado, apague a linha `setup_token` do `config.php` (opcional, a tela de criação some sozinha).
 5. Em **Configurações**, confira WhatsApp, e-mail que recebe os avisos, endereço e redes.

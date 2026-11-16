@@ -380,11 +380,11 @@ function admin_logout(): void
 
 function senha_forte(string $s): ?string
 {
-    if (mb_strlen($s) < 10) {
-        return 'A senha precisa ter pelo menos 10 caracteres.';
+    if (mb_strlen($s) < 8) {
+        return 'A senha precisa ter pelo menos 8 caracteres.';
     }
-    if (!preg_match('/[A-Za-z]/', $s) || !preg_match('/\d/', $s)) {
-        return 'Use letras e números na senha.';
+    if (!preg_match('/\p{L}/u', $s) || !preg_match('/\d/', $s) || !preg_match('/[^\p{L}\d]/u', $s)) {
+        return 'A senha precisa ter letras, números e pelo menos um caractere especial (ex.: ! @ # $ %).';
     }
     return null;
 }

@@ -229,11 +229,11 @@ layout_head([
     <div class="wrap">
       <div class="team">
         <article class="mate">
-          <div class="mate-pic"><img src="<?= e(url('assets/img/felipe-foto.webp')) ?>" alt="Felipe, assistente da JC Síndico Profissional" width="900" height="1600" loading="lazy"></div>
+          <div class="mate-pic"><img src="<?= e(url('assets/img/felipe-foto.webp')) ?>" alt="Felipe, síndico profissional auxiliar da JC Síndico Profissional" width="900" height="1600" loading="lazy"></div>
           <div class="mate-txt">
             <span class="eyebrow">Equipe JC</span>
             <h3>Felipe</h3>
-            <p class="role">Assistente de gestão</p>
+            <p class="role">Síndico profissional auxiliar</p>
             <p>Acompanha o Junior nas visitas, organiza as demandas dos moradores e faz a ponte com fornecedores, para que nenhum pedido fique sem resposta.</p>
           </div>
         </article>

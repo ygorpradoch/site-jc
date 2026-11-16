@@ -182,8 +182,8 @@ $codigosNovos = $estagio === 'codigos' ? (array) ($_SESSION['codigos_novos'] ?? 
       <?php if ($erro): ?><p class="err-msg" role="alert"><?= e($erro) ?></p><?php endif; ?>
       <div class="field"><label for="a-email">E-mail</label><input id="a-email" value="<?= e($convite['email']) ?>" disabled></div>
       <div class="field"><label for="a-nome">Seu nome</label><input id="a-nome" name="nome" required autocomplete="name" value="<?= e($_POST['nome'] ?? $convite['nome']) ?>"></div>
-      <div class="field"><label for="a-pass">Senha <span>(mín. 10, letras e números)</span></label><input id="a-pass" name="senha" type="password" required autocomplete="new-password" minlength="10"></div>
-      <div class="field"><label for="a-pass2">Repita a senha</label><input id="a-pass2" name="senha2" type="password" required autocomplete="new-password" minlength="10"></div>
+      <div class="field"><label for="a-pass">Senha <span>(mín. 8, com letras, números e caractere especial)</span></label><input id="a-pass" name="senha" type="password" required autocomplete="new-password" minlength="8"></div>
+      <div class="field"><label for="a-pass2">Repita a senha</label><input id="a-pass2" name="senha2" type="password" required autocomplete="new-password" minlength="8"></div>
       <button class="btn btn-ink" type="submit">Criar acesso</button>
     <?php elseif (!$temUsuario): ?>
       <input type="hidden" name="acao" value="criar">
@@ -193,8 +193,8 @@ $codigosNovos = $estagio === 'codigos' ? (array) ($_SESSION['codigos_novos'] ?? 
       <div class="field"><label for="a-token">Código de instalação</label><input id="a-token" name="token" required autocomplete="off"></div>
       <div class="field"><label for="a-nome">Seu nome</label><input id="a-nome" name="nome" required autocomplete="name" value="<?= e($_POST['nome'] ?? '') ?>"></div>
       <div class="field"><label for="a-email">E-mail</label><input id="a-email" name="email" type="email" required autocomplete="username" value="<?= e($_POST['email'] ?? '') ?>"></div>
-      <div class="field"><label for="a-pass">Senha <span>(mín. 10, letras e números)</span></label><input id="a-pass" name="senha" type="password" required autocomplete="new-password" minlength="10"></div>
-      <div class="field"><label for="a-pass2">Repita a senha</label><input id="a-pass2" name="senha2" type="password" required autocomplete="new-password" minlength="10"></div>
+      <div class="field"><label for="a-pass">Senha <span>(mín. 8, com letras, números e caractere especial)</span></label><input id="a-pass" name="senha" type="password" required autocomplete="new-password" minlength="8"></div>
+      <div class="field"><label for="a-pass2">Repita a senha</label><input id="a-pass2" name="senha2" type="password" required autocomplete="new-password" minlength="8"></div>
       <button class="btn btn-ink" type="submit">Criar acesso</button>
     <?php else: ?>
       <input type="hidden" name="acao" value="entrar">

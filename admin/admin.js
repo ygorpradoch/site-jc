@@ -480,10 +480,10 @@ VIEWS.usuarios=function(extra){
       field('Nome',cNome),field('E-mail',cEmail),h('button.btn.btn-ink.btn-sm',{type:'submit'},'Convidar'));
 
     /* minha conta */
-    var at=h('input',{type:'password',autocomplete:'current-password',required:true}),nv=h('input',{type:'password',autocomplete:'new-password',required:true,minLength:10}),nv2=h('input',{type:'password',autocomplete:'new-password',required:true,minLength:10}),cod=h('input',{inputMode:'numeric',autocomplete:'one-time-code',maxLength:7,required:true,placeholder:'6 dígitos'});
+    var at=h('input',{type:'password',autocomplete:'current-password',required:true}),nv=h('input',{type:'password',autocomplete:'new-password',required:true,minLength:8}),nv2=h('input',{type:'password',autocomplete:'new-password',required:true,minLength:8}),cod=h('input',{inputMode:'numeric',autocomplete:'one-time-code',maxLength:7,required:true,placeholder:'6 dígitos'});
     var fs=h('form.panel',{onsubmit:function(e){e.preventDefault();if(nv.value!==nv2.value){toast('As senhas novas não conferem',true);return}
         api('senha',{atual:at.value,nova:nv.value,codigo:cod.value}).then(function(x){if(x.ok){toast('Senha alterada');fs.reset()}})}},
-      h('h3','Trocar minha senha'),h('div.fgrid2',field('Senha atual',at),field('Código do aplicativo',cod,false,'(2 etapas)'),field('Nova senha',nv,false,'(mín. 10, letras e números)'),field('Repita a nova senha',nv2),h('div.full.right',h('button.btn.btn-ink',{type:'submit'},'Trocar senha'))));
+      h('h3','Trocar minha senha'),h('div.fgrid2',field('Senha atual',at),field('Código do aplicativo',cod,false,'(2 etapas)'),field('Nova senha',nv,false,'(mín. 8, com letras, números e caractere especial)'),field('Repita a nova senha',nv2),h('div.full.right',h('button.btn.btn-ink',{type:'submit'},'Trocar senha'))));
 
     function formSeguro(txt,botao,perigo,fn){
       var s=h('input',{type:'password',autocomplete:'current-password',required:true}),c=h('input',{inputMode:'numeric',autocomplete:'one-time-code',maxLength:7,required:true,placeholder:'6 dígitos'});
