@@ -131,3 +131,7 @@ Requer PHP 8.1+ e MySQL/MariaDB. Crie `app/config.local.php` (ignorado pelo Git)
 ## Agenda
 
 Em **Agenda → Horários de atendimento** o master define, para cada dia da semana (inclusive sábado e domingo), se atende de manhã e/ou à tarde e em que horário, a duração de cada conversa (15 a 90 min), o aviso mínimo e quantos dias à frente o site mostra. Conversas já marcadas continuam valendo se os horários mudarem; bloqueios de data/horário continuam funcionando por cima da grade.
+
+## Números de destaque e SEO (2026-11)
+- **Números da primeira tela** (anos, condomínios, unidades): Painel > Configurações > "Números de destaque". Cada um pode ser automático, digitado (com "+" opcional) ou oculto; chaves `num_<anos|cond|un>_<modo|valor|mais>` em `configuracoes`. Os textos da página que citam esses números seguem a mesma regra.
+- **SEO**: title/description da home, JSON-LD em grafo (empresa, Junior, site, FAQ — o FAQ visível e o schema usam a mesma lista `$faq` em index.php), BlogPosting + BreadcrumbList nos artigos, sitemap com lastmod real, `noindex,follow` nas páginas filtradas/paginadas do guia, `X-Robots-Tag` em /admin e /api, 301 de URLs duplicadas (.php). A indexação só liga com `'indexar' => true` no `jc-config/config.php` (fora do Git); conferir `site_url`.

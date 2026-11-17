@@ -38,23 +38,40 @@ if ($art) {
     $linkArt = abs_url('guia/' . $art['slug']);
     $imgSocial = capa_url($art['capa'] ?? null) ? $art['capa'] : ($capaPadrao ?: 'assets/img/og.jpg');
     layout_head([
-        'title' => $art['titulo'] . ' | Guia do condomínio · JC Síndico',
+        'title' => (mb_strlen($art['titulo']) > 48 ? $art['titulo'] : $art['titulo'] . ' | JC Síndico'),
         'desc' => $art['resumo'],
         'path' => 'guia/' . $art['slug'],
         'type' => 'article',
         'image' => $imgSocial,
         'robots' => $previa !== null ? 'noindex, nofollow' : null,
+        'image_alt' => $art['titulo'],
         'jsonld' => [
             '@context' => 'https://schema.org',
-            '@type' => 'Article',
-            'headline' => $art['titulo'],
-            'description' => $art['resumo'],
-            'image' => [abs_url($imgSocial)],
-            'datePublished' => $art['publicado_em'] ? date('c', strtotime($art['publicado_em'])) : null,
-            'dateModified' => date('c', strtotime($art['atualizado_em'] ?? 'now')),
-            'author' => ['@type' => 'Organization', 'name' => 'JC Síndico Profissional'],
-            'publisher' => ['@type' => 'Organization', 'name' => 'JC Síndico Profissional', 'logo' => ['@type' => 'ImageObject', 'url' => abs_url('assets/img/logo-v-azul.svg')]],
-            'mainEntityOfPage' => $linkArt,
+            '@graph' => [
+                [
+                    '@type' => 'BlogPosting',
+                    '@id' => $linkArt . '#artigo',
+                    'headline' => mb_substr($art['titulo'], 0, 110),
+                    'description' => $art['resumo'],
+                    'image' => [abs_url($imgSocial)],
+                    'datePublished' => $art['publicado_em'] ? date('c', strtotime($art['publicado_em'])) : null,
+                    'dateModified' => date('c', strtotime($art['atualizado_em'] ?? 'now')),
+                    'inLanguage' => 'pt-BR',
+                    'author' => ['@type' => 'Person', 'name' => 'Junior Chagas', 'url' => abs_url('') . '#quem-sou'],
+                    'publisher' => ['@id' => abs_url('') . '#negocio', '@type' => 'Organization', 'name' => 'JC Síndico Profissional', 'logo' => ['@type' => 'ImageObject', 'url' => abs_url('favicon.png')]],
+                    'mainEntityOfPage' => $linkArt,
+                    'isPartOf' => ['@type' => 'Blog', 'name' => 'Guia do condomínio', 'url' => abs_url('guia')],
+                    'wordCount' => str_word_count(strip_tags((string) $art['corpo'])),
+                ],
+                [
+                    '@type' => 'BreadcrumbList',
+                    'itemListElement' => [
+                        ['@type' => 'ListItem', 'position' => 1, 'name' => 'Início', 'item' => abs_url('')],
+                        ['@type' => 'ListItem', 'position' => 2, 'name' => 'Guia', 'item' => abs_url('guia')],
+                        ['@type' => 'ListItem', 'position' => 3, 'name' => $art['titulo'], 'item' => $linkArt],
+                    ],
+                ],
+            ],
         ],
     ]);
     $textoShare = $art['titulo'] . ' — Guia do condomínio, JC Síndico Profissional';
@@ -69,7 +86,7 @@ if ($art) {
     <h1><?= e($art['titulo']) ?></h1>
     <?php if ($art['resumo']): ?><p class="art-lead"><?= e($art['resumo']) ?></p><?php endif; ?>
     <div class="art-by"><img src="<?= e(url('favicon.svg')) ?>" alt="" width="44" height="44"><span><b>JC Síndico Profissional</b>Guia do condomínio<?= $art['publicado_em'] ? ' · ' . e(fmt_data($art['publicado_em'])) : '' ?></span></div>
-    <?php if ($capa): ?><figure class="art-cover"><img src="<?= e($capa) ?>" alt="" width="1200" height="630" fetchpriority="high"></figure><?php endif; ?>
+    <?php if ($capa): ?><figure class="art-cover"><img src="<?= e($capa) ?>" alt="<?= e($art['titulo']) ?>" width="1200" height="630" fetchpriority="high"></figure><?php endif; ?>
     <div class="art-body">
       <?= artigo_html((string) $art['corpo']) ?>
     </div>
@@ -87,7 +104,7 @@ if ($art) {
     <aside class="art-cta">
       <div><b>Quer ajuda com isso no seu condomínio?</b><span>Converse com a JC. A primeira conversa é sem custo.</span></div>
       <a class="btn btn-sun" href="<?= e(url('')) ?>#contato">Pedir proposta</a>
-      <a class="btn btn-line" href="<?= e(wa_link('Olá, li o artigo "' . $art['titulo'] . '" no site e queria conversar.')) ?>" target="_blank" rel="noopener">WhatsApp</a>
+      <a class="btn btn-line" href="<?= e(wa_link('Olá! Li o artigo "' . $art['titulo'] . '" no site da JC Síndico Profissional e queria conversar sobre o meu condomínio.')) ?>" target="_blank" rel="noopener">WhatsApp</a>
     </aside>
   </article>
   <?php if ($outros): ?>
@@ -122,6 +139,7 @@ layout_head([
     'title' => ($cat ? mb_convert_case(mb_strtolower($cat), MB_CASE_TITLE) . ': artigos' : 'Guia do condomínio: artigos para síndicos e conselheiros') . ($pag > 1 ? ' (página ' . $pag . ')' : '') . ' | JC Síndico',
     'desc' => 'Textos curtos sobre as dúvidas que aparecem nas assembleias: eleição de síndico, fundo de reserva, manutenção e prestação de contas.',
     'path' => $qs($cat ?: null, $pag),
+    'robots' => ($cat !== '' || $pag > 1) ? 'noindex, follow' : null,
 ]);
 ?>
 <body class="sub">

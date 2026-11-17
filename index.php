@@ -3,9 +3,9 @@ require __DIR__ . '/app/bootstrap.php';
 require JC_APP . '/layout.php';
 
 $condos = condominios_site();
-$totUn = array_sum(array_map(fn($c) => (int) $c['unidades'], $condos));
-$nCond = count($condos);
-$anos = anos_gestao();
+$nums = numeros_destaque($condos);   // números de destaque (Painel > Configurações): automáticos, manuais ou ocultos
+$fraseNum = numeros_frase($nums);
+$fraseCond = $nums['cond']['frase'] ?? '';
 $depos = depoimentos_site();
 $posts = artigos_publicados(3);
 // Primeira tela (Painel > Configurações): escolha separada para computador e celular; sem escolha própria, vale 'hero_estilo'.
@@ -19,13 +19,22 @@ $waRef = wa_link('Olá, gostaria de falar com o conselho de um condomínio atend
 
 header('Cache-Control: public, max-age=300');
 
+// Perguntas frequentes: fonte única para o texto visível e para os dados estruturados (FAQPage). [pergunta, resposta, nota legal opcional]
+$faq = [
+    ['Uma pessoa de fora do prédio pode ser síndica?', 'Pode. A lei permite que a assembleia eleja um síndico que não seja condômino, pessoa física ou empresa.', 'Código Civil, art. 1.347'],
+    ['Quanto custa um síndico profissional?', 'O valor depende do número de unidades, da estrutura do prédio e da frequência de visitas. Enviamos uma proposta fechada depois da conversa inicial, sem custo.', ''],
+    ['Como fica a administradora que já atende o condomínio?', 'Ela pode continuar. A JC trabalha junto com a administradora atual, que segue cuidando de boletos e folha, e fica responsável pela gestão e pelas decisões do dia a dia.', ''],
+    ['Os moradores conseguem acompanhar as contas?', 'Sim. Todo mês cada unidade recebe a prestação de contas, com receitas, despesas, saldo e fundo de reserva.', ''],
+    ['E se o condomínio não ficar satisfeito?', 'A assembleia pode destituir o síndico conforme o Código Civil e a convenção do condomínio. Além disso, o contrato prevê encerramento com aviso prévio.', 'Código Civil, art. 1.349'],
+];
+
 layout_head([
-    'title' => 'Síndico profissional em Fortaleza | JC Síndico Profissional',
-    'desc' => "A JC Síndico Profissional administra condomínios em Fortaleza desde 2014. Gestão financeira, manutenção, assembleias e visita semanal, com prestação de contas todo mês. {$nCond} condomínios, {$totUn} unidades.",
+    'title' => 'Síndico profissional em Fortaleza | JC Síndico · Junior Chagas',
+    'desc' => 'Síndico profissional em Fortaleza desde ' . setting('inicio_ano') . ': gestão financeira, manutenção, assembleias e visita semanal, com prestação de contas todo mês. Peça uma proposta.',
     'path' => '',
     'preload' => ['assets/img/junior-frontal.webp'],
     'css' => $heroEstilo === 'clara' ? ['assets/css/hero-clara.css'] : [],
-    'jsonld' => jsonld_negocio(),
+    'jsonld' => jsonld_graph_home($faq),
 ]);
 ?>
 <body class="hero-<?= $heroEstilo ?>" data-wa="<?= e($waDigits) ?>" data-api="<?= e(url('api/')) ?>">
@@ -131,7 +140,7 @@ layout_head([
     <div class="wrap">
       <div class="head">
         <div><span class="eyebrow">4º andar · Condomínios atendidos</span><h2 class="h2">Condomínios que administramos em Fortaleza</h2></div>
-        <p>O primeiro contrato completou <?= $anos ?> anos e continua ativo. <b><?= $nCond ?> condomínios, <?= $totUn ?> unidades.</b> Quer uma referência? Pedimos ao conselho de um deles para conversar com você.</p>
+        <p>O primeiro contrato completou <?= anos_gestao() ?> anos e continua ativo.<?php if ($fraseNum !== ''): ?> <b><?= e(ucfirst($fraseNum)) ?>.</b><?php endif; ?> Quer uma referência? Pedimos ao conselho de um deles para conversar com você.</p>
       </div>
       <div class="condos-x" id="condos-x" tabindex="0" role="region" aria-label="Condomínios atendidos. Deslize para o lado ou use as setas.">
         <div class="condos" id="condos">
@@ -193,7 +202,7 @@ layout_head([
       <div class="about-intro">
         <span class="eyebrow">5º andar · Quem somos</span>
         <h2 class="h2">Uma gestão que conhece o prédio pelo nome dos funcionários</h2>
-        <p class="lead">A JC começou em <?= e(setting('inicio_ano')) ?>, com o Junior Chagas à frente do primeiro condomínio, e fez da gestão condominial profissional a sua especialidade. Hoje atendemos <?= $nCond ?> condomínios em Fortaleza, sempre com o mesmo método.</p>
+        <p class="lead">A JC começou em <?= e(setting('inicio_ano')) ?>, com o Junior Chagas à frente do primeiro condomínio, e fez da gestão condominial profissional a sua especialidade. <?= $fraseCond !== '' ? 'Hoje atendemos ' . e($fraseCond) . ' em Fortaleza, sempre com o mesmo método.' : 'Hoje atendemos condomínios em Fortaleza, sempre com o mesmo método.' ?></p>
         <p class="muted">Trabalhamos com três compromissos: transparência nas contas, imparcialidade nas decisões entre moradores e cuidado constante com a saúde financeira do condomínio. Sem vínculo com nenhuma unidade, tratamos todos da mesma forma.</p>
       </div>
       <div class="team team-solo">
@@ -203,12 +212,12 @@ layout_head([
             <span class="eyebrow">Fundador da JC</span>
             <h3>Junior Chagas</h3>
             <p class="role">Síndico profissional · CNPJ <?= e(setting('cnpj')) ?></p>
-            <p>Síndico profissional desde <?= e(setting('inicio_ano')) ?>, com visita semanal e prestação de contas todo mês. Responde pela gestão dos <?= $nCond ?> condomínios atendidos pela JC e pelo método que a equipe segue.</p>
+            <p>Síndico profissional desde <?= e(setting('inicio_ano')) ?>, com visita semanal e prestação de contas todo mês. Responde pela gestão dos condomínios atendidos pela JC e pelo método que a equipe segue.</p>
             <ol class="timeline">
               <li><span class="y">2023</span><div><b>Processos Gerenciais</b><small>Faculdade Estácio de Sá</small></div></li>
               <li><span class="y">2020</span><div><b>Curso de Gestão Condominial</b><small>SENAC Ceará</small></div></li>
               <li><span class="y">2017</span><div><b>Síndico Profissional</b><small>Curso SíndicoNet</small></div></li>
-              <li><span class="y">2014</span><div><b>Primeiro condomínio sob gestão</b><small>Cond. Praia Nova, até hoje</small></div></li>
+              <li><span class="y">2014</span><div><b>Primeiro condomínio sob gestão</b><small>Primeiro contrato, ativo até hoje</small></div></li>
               <li><span class="y">2008</span><div><b>Pedagogia</b><small>Faculdade da Ibiapaba</small></div></li>
             </ol>
           </div>
@@ -297,11 +306,9 @@ layout_head([
         <p>Se a sua pergunta não estiver aqui, mande no WhatsApp. Respondemos até o próximo dia útil.</p>
       </div>
       <div>
-        <details open><summary>Uma pessoa de fora do prédio pode ser síndica?</summary><p>Pode. A lei permite que a assembleia eleja um síndico que não seja condômino, pessoa física ou empresa.<small>Código Civil, art. 1.347</small></p></details>
-        <details><summary>Quanto custa um síndico profissional?</summary><p>O valor depende do número de unidades, da estrutura do prédio e da frequência de visitas. Enviamos uma proposta fechada depois da conversa inicial, sem custo.</p></details>
-        <details><summary>Como fica a administradora que já atende o condomínio?</summary><p>Ela pode continuar. A JC trabalha junto com a administradora atual, que segue cuidando de boletos e folha, e fica responsável pela gestão e pelas decisões do dia a dia.</p></details>
-        <details><summary>Os moradores conseguem acompanhar as contas?</summary><p>Sim. Todo mês cada unidade recebe a prestação de contas, com receitas, despesas, saldo e fundo de reserva.</p></details>
-        <details><summary>E se o condomínio não ficar satisfeito?</summary><p>A assembleia pode destituir o síndico conforme o Código Civil e a convenção do condomínio. Além disso, o contrato prevê encerramento com aviso prévio.<small>Código Civil, art. 1.349</small></p></details>
+        <?php foreach ($faq as $i => $f): ?>
+        <details<?= $i === 0 ? ' open' : '' ?>><summary><?= e($f[0]) ?></summary><p><?= e($f[1]) ?><?php if ($f[2] !== ''): ?><small><?= e($f[2]) ?></small><?php endif; ?></p></details>
+        <?php endforeach; ?>
       </div>
     </div>
   </section>

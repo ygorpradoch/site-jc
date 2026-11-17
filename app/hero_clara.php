@@ -1,4 +1,4 @@
-<?php /* Primeira tela clara: céu claro, prédio azul, janelas amarelas. Variáveis: $anos, $nCond, $totUn. */ ?>
+<?php /* Primeira tela clara: céu claro, prédio azul, janelas amarelas. Variável: $nums. */ ?>
   <section class="hc" id="inicio" data-floor="T" data-label="Térreo">
     <div class="hc-bgw" aria-hidden="true">
       <div class="hc-grid"></div>
@@ -11,7 +11,7 @@
         <h1>Síndico profissional em Fortaleza, com contas abertas todo mês</h1>
         <p class="hc-lead">Somos a <b>JC Síndico Profissional</b>. Nossa equipe cuida das finanças, da manutenção e das assembleias do seu condomínio, com visita toda semana e prestação de contas que qualquer morador entende.</p>
         <div class="hc-cta"><a class="btn btn-sun" href="#contato" data-ride="contato">Pedir proposta</a><a class="btn btn-line" href="#diagnostico" data-ride="diagnostico">Diagnóstico grátis</a></div>
-        <div class="hc-nums" aria-label="Números da JC"><span class="led"><b><?= (int) $anos ?></b>anos de gestão</span><span class="led"><b><?= (int) $nCond ?></b>condomínios</span><span class="led"><b><?= e(number_format((int) $totUn, 0, ',', '.')) ?></b>unidades</span></div>
+        <?php if ($nums): ?><div class="hc-nums" aria-label="Números da JC"><?php foreach ($nums as $n): ?><span class="led"><b><?= e($n['valor']) ?></b><?= e($n['rotulo']) ?></span><?php endforeach; ?></div><?php endif; ?>
       </div>
       <div class="hc-stage">
         <div class="hc-people" id="hc-people">

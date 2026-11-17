@@ -442,8 +442,20 @@ case 'config_salvar':
             $campos[$hk] = 20; // só para entrar no registro abaixo
         }
     }
+    /* números de destaque: automático, manual (só dígitos) ou oculto; "+" opcional */
+    foreach (['anos' => 'anos de gestão', 'cond' => 'condomínios', 'un' => 'unidades'] as $nk => $nome) {
+        if (!array_key_exists("num_{$nk}_modo", $in)) continue;
+        $modo = (string) $in["num_{$nk}_modo"];
+        if (!in_array($modo, ['auto', 'manual', 'oculto'], true)) json_fail('Modo inválido para ' . $nome . '.');
+        $valor = preg_replace('/\D+/', '', (string) ($in["num_{$nk}_valor"] ?? '')) ?? '';
+        if ($modo === 'manual' && ($valor === '' || strlen($valor) > 6)) json_fail('Digite o número de ' . $nome . ' (até 6 dígitos).');
+        db_q('REPLACE INTO configuracoes (chave, valor) VALUES (?, ?)', ["num_{$nk}_modo", $modo]);
+        db_q('REPLACE INTO configuracoes (chave, valor) VALUES (?, ?)', ["num_{$nk}_valor", $valor]);
+        db_q('REPLACE INTO configuracoes (chave, valor) VALUES (?, ?)', ["num_{$nk}_mais", !empty($in["num_{$nk}_mais"]) && (string) $in["num_{$nk}_mais"] !== '0' ? '1' : '0']);
+        $campos["num_{$nk}_modo"] = 10;
+    }
     foreach ($campos as $k => $max) {
-        if (!in_array($k, $heroChaves, true) && array_key_exists($k, $in)) {
+        if (!in_array($k, $heroChaves, true) && strpos($k, 'num_') !== 0 && array_key_exists($k, $in)) {
             $v = clean_line($in[$k], $max);
             if ($k === 'whatsapp') {
                 $v = fmt_phone((string) clean_phone($v));

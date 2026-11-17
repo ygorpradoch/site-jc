@@ -575,7 +575,29 @@ VIEWS.config=function(){
       grupo('hero_estilo_web','No computador (web)','Telas largas: computador e tablet grande.'),
       grupo('hero_estilo_mobile','No celular','Aparelhos celulares, em pé ou deitados.'),
       h('div.full.right',h('button.btn.btn-ink',{type:'submit'},'Salvar escolha')));
-    render(title('Configurações','Dados que aparecem em todo o site. A troca de senha fica em Usuários → Minha conta.'),form,formHero);
+    /* números de destaque da primeira tela */
+    var NUMS=[['anos','Anos de gestão','Automático: conta a partir do ano de início ('+(c.inicio_ano||'2014')+').'],['cond','Condomínios','Automático: conta os condomínios marcados para aparecer no site.'],['un','Unidades','Automático: soma as unidades dos condomínios que aparecem no site.']];
+    var NE={};
+    function nGrupo(x){
+      var k=x[0],st={modo:c['num_'+k+'_modo']||'auto'};
+      var val=h('input',{type:'text',inputMode:'numeric',maxLength:6,placeholder:'Ex.: 12',value:c['num_'+k+'_valor']||'','aria-label':x[1]+': número'});
+      var mais=h('input',{type:'checkbox'});mais.checked=c['num_'+k+'_mais']==='1';
+      var linhaManual=h('div.num-manual',val,h('label.num-mais',mais,' mostrar com "+" (ex.: +12)'));
+      function ajusta(){linhaManual.style.display=st.modo==='manual'?'':'none';val.disabled=st.modo!=='manual';mais.disabled=st.modo==='oculto'}
+      var ops=[['auto','Automático'],['manual','Digitar o número'],['oculto','Não mostrar']].map(function(o){
+        var r=h('input',{type:'radio',name:'num_'+k,value:o[0]});r.checked=st.modo===o[0];
+        r.addEventListener('change',function(){st.modo=o[0];ajusta()});return h('label.num-op',r,' '+o[1])});
+      ajusta();NE[k]={st:st,val:val,mais:mais};
+      return h('div.hero-grp',h('h4',x[1]),h('p.muted',x[2]),h('div.num-ops',ops),linhaManual);
+    }
+    var formNums=h('form.panel.mt',{onsubmit:function(e){e.preventDefault();var d={};
+        NUMS.forEach(function(x){var n=NE[x[0]];d['num_'+x[0]+'_modo']=n.st.modo;d['num_'+x[0]+'_valor']=n.val.value;d['num_'+x[0]+'_mais']=n.mais.checked?'1':'0'});
+        api('config_salvar',d).then(function(x){if(x.ok)toast('Números atualizados. Pode levar até 5 minutos para aparecer a quem já visitou o site.')})}},
+      h('h3','Números de destaque'),
+      h('p.muted','Os cartões da primeira tela (e os textos que citam esses números). Deixe automático, digite o número que quiser (por exemplo, mais condomínios do que os cadastrados) ou esconda o que não quiser mostrar.'),
+      NUMS.map(nGrupo),
+      h('div.full.right',h('button.btn.btn-ink',{type:'submit'},'Salvar números')));
+    render(title('Configurações','Dados que aparecem em todo o site. A troca de senha fica em Usuários → Minha conta.'),form,formNums,formHero);
   });
 };
 

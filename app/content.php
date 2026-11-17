@@ -12,6 +12,9 @@ const JC_SETTINGS_DEFAULT = [
     'instagram' => 'https://www.instagram.com/jc.sindicoprofissional/',
     'linkedin' => 'https://www.linkedin.com/in/junior-chagas-13ba17188/',
     'inicio_ano' => '2014',
+    'num_anos_modo' => 'auto', 'num_anos_valor' => '', 'num_anos_mais' => '0', // números de destaque: auto | manual | oculto
+    'num_cond_modo' => 'auto', 'num_cond_valor' => '', 'num_cond_mais' => '0',
+    'num_un_modo' => 'auto', 'num_un_valor' => '', 'num_un_mais' => '0',
     'hero_estilo' => 'escura', // primeira tela do site: 'escura' (original) ou 'clara' (prédio); vale para as duas telas enquanto não houver escolha própria
     'hero_estilo_web' => '',    // escolha só para computador/tablet grande ('' = usa hero_estilo)
     'hero_estilo_mobile' => '', // escolha só para celular ('' = usa hero_estilo)
@@ -39,6 +42,48 @@ function anos_gestao(): int
     $ini = (int) setting('inicio_ano') ?: 2014;
     // Primeiro contrato começou em junho
     return (int) date('Y') - $ini - ((int) date('n') < 6 ? 1 : 0);
+}
+
+/* ---------- números de destaque (primeira tela e textos) ----------
+ * Cada número tem modo 'auto' (calculado), 'manual' (valor digitado no painel) ou 'oculto',
+ * e pode levar o sinal "+" (ex.: +12 condomínios). */
+const JC_NUMEROS = ['anos' => ['ano', 'anos', 'de gestão'], 'cond' => ['condomínio', 'condomínios', ''], 'un' => ['unidade', 'unidades', '']];
+
+function numeros_destaque(array $condos): array
+{
+    $auto = ['anos' => anos_gestao(), 'cond' => count($condos), 'un' => array_sum(array_map(fn($c) => (int) $c['unidades'], $condos))];
+    $out = [];
+    foreach (JC_NUMEROS as $k => [$sing, $plur, $suf]) {
+        $modo = setting("num_{$k}_modo");
+        if ($modo === 'oculto') {
+            continue;
+        }
+        $n = $auto[$k];
+        if ($modo === 'manual' && preg_match('/^\d{1,6}$/', setting("num_{$k}_valor"))) {
+            $n = (int) setting("num_{$k}_valor");
+        }
+        $mais = setting("num_{$k}_mais") === '1';
+        $out[$k] = [
+            'n' => $n,
+            'mais' => $mais,
+            'valor' => ($mais ? '+' : '') . number_format($n, 0, ',', '.'),
+            'rotulo' => trim(($n === 1 ? $sing : $plur) . ' ' . $suf),
+            'frase' => ($mais ? 'mais de ' : '') . number_format($n, 0, ',', '.') . ' ' . ($n === 1 ? $sing : $plur),
+        ];
+    }
+    return $out;
+}
+
+/** "12 condomínios, 322 unidades" conforme o que o painel deixou visível. */
+function numeros_frase(array $nums, array $chaves = ['cond', 'un']): string
+{
+    $p = [];
+    foreach ($chaves as $k) {
+        if (isset($nums[$k])) {
+            $p[] = $nums[$k]['frase'];
+        }
+    }
+    return implode(', ', $p);
 }
 
 /* ---------- condomínios ---------- */

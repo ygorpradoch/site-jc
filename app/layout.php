@@ -14,7 +14,7 @@ function layout_head(array $o): void
     $desc = $o['desc'] ?? '';
     $canon = abs_url($o['path'] ?? '');
     $img = abs_url($o['image'] ?? 'assets/img/og.jpg');
-    $robots = $o['robots'] ?? (cfg('indexar', false) ? 'index, follow' : 'noindex, nofollow');
+    $robots = $o['robots'] ?? (cfg('indexar', false) ? 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1' : 'noindex, nofollow');
     ?><!doctype html>
 <html lang="pt-BR" data-theme="light">
 <head>
@@ -38,6 +38,7 @@ function layout_head(array $o): void
 <meta property="og:image" content="<?= e($img) ?>">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="<?= e($o['image_alt'] ?? $title) ?>">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -47,7 +48,7 @@ function layout_head(array $o): void
 <link rel="stylesheet" href="<?= e(asset($c)) ?>">
 <?php endforeach; ?>
 <?php foreach (($o['preload'] ?? []) as $p): ?>
-<link rel="preload" as="image" href="<?= e(url($p)) ?>" fetchpriority="high">
+<link rel="preload" as="image" type="image/webp" href="<?= e(url($p)) ?>" fetchpriority="high">
 <?php endforeach; ?>
 <?php if (!empty($o['jsonld'])): ?>
 <script type="application/ld+json"><?= json_encode($o['jsonld'], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG) ?></script>
@@ -116,33 +117,67 @@ function layout_footer(bool $home): void
 <?php
 }
 
-/** Dados estruturados do negócio (Google). */
-function jsonld_negocio(): array
+/** Dados estruturados da página inicial: empresa, Junior, site, página e FAQ (a MESMA lista exibida na página). */
+function jsonld_graph_home(array $faq): array
 {
     $wa = preg_replace('/\D+/', '', setting('whatsapp')) ?? '';
-    return [
-        '@context' => 'https://schema.org',
-        '@type' => 'ProfessionalService',
+    $site = abs_url('');
+    $idOrg = $site . '#negocio';
+    $idJr = $site . '#junior-chagas';
+    $cep = preg_match('/\d{5}-\d{3}/', setting('endereco2'), $m) ? $m[0] : '';
+    $same = array_values(array_filter([setting('instagram'), setting('linkedin')]));
+    $negocio = [
+        '@type' => ['ProfessionalService', 'LocalBusiness'],
+        '@id' => $idOrg,
         'name' => 'JC Síndico Profissional',
-        'description' => 'Síndico profissional em Fortaleza desde 2014: gestão financeira, manutenção, assembleias e visitas semanais.',
-        'url' => abs_url(''),
+        'legalName' => 'Junior Chagas Síndico Profissional',
+        'alternateName' => 'JC Síndico',
+        'description' => 'Síndico profissional em Fortaleza desde ' . setting('inicio_ano') . ': gestão financeira, manutenção, assembleias e visitas semanais, com prestação de contas todo mês.',
+        'url' => $site,
         'image' => abs_url('assets/img/og.jpg'),
-        'logo' => abs_url('assets/img/logo-v-azul.svg'),
+        'logo' => abs_url('favicon.png'),
         'telephone' => '+55' . $wa,
+        'email' => setting('email_contato'),
         'taxID' => setting('cnpj'),
-        'founder' => ['@type' => 'Person', 'name' => 'Junior Chagas', 'jobTitle' => 'Síndico profissional'],
-        'address' => [
+        'foundingDate' => setting('inicio_ano'),
+        'founder' => ['@id' => $idJr],
+        'address' => array_filter([
             '@type' => 'PostalAddress',
             'streetAddress' => setting('endereco'),
             'addressLocality' => 'Fortaleza',
             'addressRegion' => 'CE',
-            'postalCode' => '60811-341',
+            'postalCode' => $cep,
             'addressCountry' => 'BR',
+        ]),
+        'areaServed' => ['@type' => 'City', 'name' => 'Fortaleza', 'containedInPlace' => ['@type' => 'AdministrativeArea', 'name' => 'Ceará']],
+        'knowsAbout' => ['Síndico profissional', 'Gestão condominial', 'Prestação de contas de condomínio', 'Assembleia de condomínio', 'Manutenção predial'],
+        'openingHoursSpecification' => [
+            ['@type' => 'OpeningHoursSpecification', 'dayOfWeek' => ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'], 'opens' => '08:00', 'closes' => '18:00'],
+            ['@type' => 'OpeningHoursSpecification', 'dayOfWeek' => 'Saturday', 'opens' => '08:00', 'closes' => '12:00'],
         ],
-        'areaServed' => ['@type' => 'City', 'name' => 'Fortaleza'],
-        'sameAs' => array_values(array_filter([setting('instagram'), setting('linkedin')])),
-        'openingHours' => ['Mo-Fr 08:00-18:00', 'Sa 08:00-12:00'],
+        'contactPoint' => [['@type' => 'ContactPoint', 'contactType' => 'customer service', 'telephone' => '+55' . $wa, 'availableLanguage' => 'pt-BR', 'areaServed' => 'BR-CE']],
+        'sameAs' => $same,
+        // Sem aggregateRating/review: avaliação própria sobre o próprio negócio não gera estrelas.
     ];
+    $pessoa = [
+        '@type' => 'Person',
+        '@id' => $idJr,
+        'name' => 'Junior Chagas',
+        'jobTitle' => 'Síndico profissional',
+        'worksFor' => ['@id' => $idOrg],
+        'url' => $site . '#quem-sou',
+        'image' => abs_url('assets/img/junior-frontal.webp'),
+        'sameAs' => array_values(array_filter([setting('linkedin')])),
+        'knowsAbout' => ['Gestão condominial', 'Síndico profissional'],
+    ];
+    $website = ['@type' => 'WebSite', '@id' => $site . '#website', 'url' => $site, 'name' => 'JC Síndico Profissional', 'inLanguage' => 'pt-BR', 'publisher' => ['@id' => $idOrg]];
+    $pagina = ['@type' => 'WebPage', '@id' => $site . '#pagina', 'url' => $site, 'isPartOf' => ['@id' => $site . '#website'], 'about' => ['@id' => $idOrg], 'inLanguage' => 'pt-BR'];
+    $faqLd = [
+        '@type' => 'FAQPage',
+        '@id' => $site . '#duvidas',
+        'mainEntity' => array_map(fn($f) => ['@type' => 'Question', 'name' => $f[0], 'acceptedAnswer' => ['@type' => 'Answer', 'text' => $f[1]]], $faq),
+    ];
+    return ['@context' => 'https://schema.org', '@graph' => [$negocio, $pessoa, $website, $pagina, $faqLd]];
 }
 
 /** Cartão de artigo (home, lista do guia e "continue lendo"). Capa enviada pelo painel, ou um bloco da marca. */

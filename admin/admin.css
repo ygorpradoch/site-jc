@@ -172,3 +172,9 @@ body[data-perfil="gestor"] .so-master{display:none!important}
 .hero-grp{margin-top:16px;padding-top:14px;border-top:1px solid var(--line)}
 .hero-grp h4{margin:0;font:700 16px var(--f-display)}
 .hero-grp .muted{margin:2px 0 0;font-size:13.5px}
+
+/* números de destaque */
+.num-ops{display:flex;flex-wrap:wrap;gap:6px 18px;margin:6px 0}
+.num-op,.num-mais{display:inline-flex;align-items:center;gap:6px;font-size:.95rem;cursor:pointer}
+.num-manual{display:flex;flex-wrap:wrap;align-items:center;gap:10px 18px;margin-top:6px}
+.num-manual input[type=text]{width:120px}

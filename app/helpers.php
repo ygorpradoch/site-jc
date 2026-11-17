@@ -284,5 +284,8 @@ function wa_link(string $texto = ''): string
     if ($n !== '' && !str_starts_with($n, '55')) {
         $n = '55' . $n;
     }
-    return 'https://wa.me/' . $n . ($texto !== '' ? '?text=' . rawurlencode($texto) : '');
+    if ($texto === '') {
+        $texto = 'Olá! Vi o site da JC Síndico Profissional e gostaria de conversar sobre o meu condomínio.';
+    }
+    return 'https://wa.me/' . $n . '?text=' . rawurlencode($texto);
 }

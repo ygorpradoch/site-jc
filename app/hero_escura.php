@@ -1,4 +1,4 @@
-<?php /* Primeira tela escura (versão original): mostrador de elevador, palavras gigantes e fotos em parallax. Variáveis: $anos, $nCond, $totUn. */ ?>
+<?php /* Primeira tela escura (versão original): mostrador de elevador, palavras gigantes e fotos em parallax. Variável: $nums. */ ?>
   <section class="sh" id="inicio" data-floor="T" data-label="Térreo">
     <div class="sh-bg" aria-hidden="true"></div>
     <div class="sh-back" aria-hidden="true">SEU PRÉDIO SEU PRÉDIO</div>
@@ -10,11 +10,7 @@
     <img class="sh-photo2" src="<?= e(url('assets/img/felipe-frontal.webp')) ?>" alt="Felipe, da equipe JC, de braços cruzados" width="1100" height="1375">
     <img class="sh-photo" fetchpriority="high" src="<?= e(url('assets/img/junior-frontal.webp')) ?>" alt="Junior Chagas, síndico profissional, de braços cruzados com a camisa da JC" width="1100" height="1375">
     <div class="sh-front" aria-hidden="true">EM BOAS <em>MÃOS</em></div>
-    <ul class="sh-chips" aria-label="Números da gestão">
-      <li><b><?= $anos ?></b>anos de gestão</li>
-      <li><b><?= $nCond ?></b>condomínios</li>
-      <li><b><?= $totUn ?></b>unidades</li>
-    </ul>
+    <?php if ($nums): ?><ul class="sh-chips" aria-label="Números da gestão"><?php foreach ($nums as $n): ?><li><b><?= e($n['valor']) ?></b><?= e($n['rotulo']) ?></li><?php endforeach; ?></ul><?php endif; ?>
     <div class="sh-copy">
       <span class="eyebrow">JC Síndico Profissional · desde <?= e(setting('inicio_ano')) ?></span>
       <h1>Síndico profissional em Fortaleza, com contas abertas todo mês</h1>
